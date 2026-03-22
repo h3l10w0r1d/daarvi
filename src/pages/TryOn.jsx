@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { products } from '../data/mockData'
-import { startTryOn, getTryOnStatus } from '../api/tryon'
+import { startTryOn, getTryOnStatus, startTryOnVideo, getTryOnVideoStatus } from '../api/tryon'
 
 const EASE = [0.76, 0, 0.24, 1]
 
@@ -234,12 +234,17 @@ export default function TryOn() {
   const [productIndex, setProductIndex] = useState(0)
   const selectedProduct = products[productIndex]
 
-  // Generation
+  // Generation — image
   const [genStepIdx, setGenStepIdx] = useState(0)
   const [predictionId, setPredictionId] = useState(null)
   const [resultUrl, setResultUrl] = useState(null)
   const [genError, setGenError] = useState(null)
   const pollRef = useRef(null)
+
+  // Generation — video (auto-starts after image succeeds)
+  const [videoStatus, setVideoStatus] = useState(null) // null | 'generating' | 'ready' | 'failed'
+  const [videoUrl, setVideoUrl] = useState(null)
+  const videoPollRef = useRef(null)
 
   // ── Photo handling ──────────────────────────────────────────────────────────
   const processFile = useCallback(async (file) => {
@@ -287,9 +292,36 @@ export default function TryOn() {
     setPredictionId(null)
     setGenError(null)
     setBodyType(null)
+    setVideoStatus(null)
+    setVideoUrl(null)
+    if (videoPollRef.current) clearInterval(videoPollRef.current)
   }, [photoUrl])
 
-  // ── Generation ──────────────────────────────────────────────────────────────
+  // ── Video generation (auto-starts after image succeeds) ──────────────────────
+  const kickOffVideo = useCallback(async (imgUrl) => {
+    setVideoStatus('generating')
+    setVideoUrl(null)
+    try {
+      const { prediction_id } = await startTryOnVideo(imgUrl)
+      videoPollRef.current = setInterval(async () => {
+        try {
+          const s = await getTryOnVideoStatus(prediction_id)
+          if (s.status === 'succeeded' && s.result_url) {
+            clearInterval(videoPollRef.current)
+            setVideoUrl(s.result_url)
+            setVideoStatus('ready')
+          } else if (s.status === 'failed' || s.status === 'canceled') {
+            clearInterval(videoPollRef.current)
+            setVideoStatus('failed')
+          }
+        } catch { /* keep polling */ }
+      }, 3000)
+    } catch {
+      setVideoStatus('failed')
+    }
+  }, [])
+
+  // ── Image generation ─────────────────────────────────────────────────────────
   const startGeneration = useCallback(async () => {
     if (!photoFile || !selectedProduct) return
     setStep('generating')
@@ -297,21 +329,19 @@ export default function TryOn() {
     setResultUrl(null)
     setGenError(null)
     setPredictionId(null)
+    setVideoStatus(null)
+    setVideoUrl(null)
 
     // Advance progress steps visually
     const stepTimer = setInterval(() => {
       setGenStepIdx(i => Math.min(i + 1, GEN_STEPS.length - 1))
-    }, 4000)
+    }, 5000)
 
     try {
-      const { prediction_id } = await startTryOn(
-        photoFile,
-        selectedProduct.image,
-        `${selectedProduct.category} - ${selectedProduct.name}`,
-      )
+      const { prediction_id } = await startTryOn(photoFile, selectedProduct.image)
       setPredictionId(prediction_id)
 
-      // Poll every 3 seconds
+      // Poll image every 3 s
       pollRef.current = setInterval(async () => {
         try {
           const status = await getTryOnStatus(prediction_id)
@@ -320,33 +350,36 @@ export default function TryOn() {
             clearInterval(stepTimer)
             setResultUrl(status.result_url)
             setStep('result')
+            // Immediately kick off video generation in background
+            kickOffVideo(status.result_url)
           } else if (status.status === 'failed' || status.status === 'canceled') {
             clearInterval(pollRef.current)
             clearInterval(stepTimer)
-            setGenError(status.error || 'Generation failed. Please try again.')
+            setGenError(status.error || 'Generation failed — please try again.')
             setStep('garment')
           }
-        } catch {
-          // polling error — keep trying
-        }
+        } catch { /* keep polling */ }
       }, 3000)
     } catch (err) {
       clearInterval(stepTimer)
-      const msg = err?.response?.data?.detail || err?.message || 'Generation failed.'
-      // If API not configured, fall back to a demo result
+      // If API not configured → demo mode
       if (err?.response?.status === 503) {
         await new Promise(r => setTimeout(r, 3000))
         setResultUrl(selectedProduct.image)
         setStep('result')
+        // no video in demo mode
       } else {
-        setGenError(msg)
+        setGenError(err?.response?.data?.detail || err?.message || 'Generation failed.')
         setStep('garment')
       }
     }
-  }, [photoFile, selectedProduct])
+  }, [photoFile, selectedProduct, kickOffVideo])
 
-  // Cleanup poll on unmount
-  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current) }, [])
+  // Cleanup on unmount
+  useEffect(() => () => {
+    if (pollRef.current) clearInterval(pollRef.current)
+    if (videoPollRef.current) clearInterval(videoPollRef.current)
+  }, [])
 
   // ── Fit analysis ────────────────────────────────────────────────────────────
   const fitAnalysis = bodyType && step === 'result'
@@ -411,9 +444,11 @@ export default function TryOn() {
               <ResultPanel
                 key="result"
                 resultUrl={resultUrl}
+                videoStatus={videoStatus}
+                videoUrl={videoUrl}
                 selectedProduct={selectedProduct}
                 fitAnalysis={fitAnalysis}
-                onRetry={() => { setStep('garment'); setResultUrl(null) }}
+                onRetry={() => { setStep('garment'); setResultUrl(null); setVideoStatus(null); setVideoUrl(null) }}
                 onReset={resetPhoto}
               />
             )}
@@ -794,13 +829,16 @@ function GarmentPanel({ productIndex, selectedProduct, onPrev, onNext, generatin
 }
 
 // ── Result Panel ───────────────────────────────────────────────────────────────
-function ResultPanel({ resultUrl, selectedProduct, fitAnalysis, onRetry, onReset }) {
-  const [rotating, setRotating] = useState(true)
+function ResultPanel({ resultUrl, videoStatus, videoUrl, selectedProduct, fitAnalysis, onRetry, onReset }) {
+  const showVideo = videoStatus === 'ready' && videoUrl
+  const videoGenerating = videoStatus === 'generating'
 
   const handleDownload = () => {
+    const url = videoUrl || resultUrl
+    const ext = videoUrl ? 'mp4' : 'jpg'
     const a = document.createElement('a')
-    a.href = resultUrl
-    a.download = `daarvi-tryon-${selectedProduct.id}.jpg`
+    a.href = url
+    a.download = `daarvi-tryon-${selectedProduct.id}.${ext}`
     a.target = '_blank'
     a.click()
   }
@@ -814,43 +852,90 @@ function ResultPanel({ resultUrl, selectedProduct, fitAnalysis, onRetry, onReset
       className="p-8 md:p-12 flex flex-col"
     >
       <p className="text-[10px] tracking-widest text-gold font-sans mb-2">YOUR LOOK</p>
-      <h2 className="font-serif text-2xl text-cream mb-6">
+      <h2 className="font-serif text-2xl text-cream mb-4">
         {selectedProduct.name}
         <span className="text-gray/50 font-sans text-[11px] tracking-widest ml-3">
           by {selectedProduct.brand}
         </span>
       </h2>
 
-      {/* Result image with rotation effect */}
-      <div className="relative aspect-[3/4] overflow-hidden mb-6" style={{ perspective: '800px' }}>
-        <motion.img
-          src={resultUrl}
-          alt="Try-on result"
-          className="w-full h-full object-cover"
-          animate={rotating ? {
-            rotateY: [0, 12, 0, -12, 0],
-          } : { rotateY: 0 }}
-          transition={rotating ? {
-            duration: 8,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          } : { duration: 0.4 }}
-          style={{ transformStyle: 'preserve-3d' }}
-        />
+      {/* ── Media area — upgrades from image → video automatically ── */}
+      <div className="relative aspect-[3/4] overflow-hidden mb-3 bg-neutral-950">
+        <AnimatePresence mode="wait">
+          {showVideo ? (
+            /* ── Real rotation video ── */
+            <motion.video
+              key="video"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              src={videoUrl}
+              autoPlay
+              loop
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            /* ── Static try-on image with CSS rotation while video loads ── */
+            <motion.img
+              key="image"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              src={resultUrl}
+              alt="Try-on result"
+              className="w-full h-full object-cover"
+              style={{
+                animation: 'tryon-rotate 8s ease-in-out infinite',
+                transformOrigin: 'center center',
+              }}
+            />
+          )}
+        </AnimatePresence>
+
         {/* Badge */}
         <div className="absolute top-3 left-3 px-2 py-1 bg-black/80 backdrop-blur border border-gold/30 text-[9px] tracking-widest font-sans text-gold flex items-center gap-1">
           <Sparkles size={9} />
-          TRY-ON RESULT
+          {showVideo ? 'ROTATION VIDEO' : 'TRY-ON RESULT'}
         </div>
-        {/* Rotation toggle */}
-        <button
-          onClick={() => setRotating(r => !r)}
-          className="absolute top-3 right-3 px-2 py-1 bg-black/80 backdrop-blur border border-white/20 text-[9px] tracking-widest font-sans text-gray hover:text-cream transition-colors flex items-center gap-1"
-        >
-          <RotateCcw size={9} className={rotating ? 'animate-spin' : ''} />
-          {rotating ? 'PAUSE' : 'ROTATE'}
-        </button>
       </div>
+
+      {/* Video status bar */}
+      <AnimatePresence>
+        {videoGenerating && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-3 px-3 py-2 border border-white/10 flex items-center gap-2 overflow-hidden"
+          >
+            <Loader2 size={11} className="animate-spin text-gold flex-shrink-0" />
+            <p className="text-[9px] tracking-widest font-sans text-gray/70">
+              GENERATING ROTATION VIDEO…
+            </p>
+            <div className="flex-1 h-px bg-white/10 overflow-hidden ml-2">
+              <motion.div
+                className="h-full bg-gold/40"
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            </div>
+          </motion.div>
+        )}
+        {showVideo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mb-3 px-3 py-1.5 border border-gold/20 bg-gold/5 flex items-center gap-2"
+          >
+            <CheckCircle2 size={11} className="text-gold flex-shrink-0" />
+            <p className="text-[9px] tracking-widest font-sans text-gold/80">
+              360° ROTATION VIDEO READY
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Fit analysis */}
       {fitAnalysis && (
@@ -858,10 +943,12 @@ function ResultPanel({ resultUrl, selectedProduct, fitAnalysis, onRetry, onReset
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.4 }}
-          className="mb-6 p-4 border border-white/10 bg-white/[0.02]"
+          className="mb-5 p-4 border border-white/10 bg-white/[0.02]"
         >
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[9px] tracking-widest text-gold font-sans">FIT ANALYSIS · {fitAnalysis.bodyLabel.toUpperCase()}</p>
+            <p className="text-[9px] tracking-widest text-gold font-sans">
+              FIT ANALYSIS · {fitAnalysis.bodyLabel.toUpperCase()}
+            </p>
             <div className="flex items-center gap-1.5">
               <div className="h-1 w-24 bg-white/10 overflow-hidden">
                 <motion.div
@@ -874,9 +961,7 @@ function ResultPanel({ resultUrl, selectedProduct, fitAnalysis, onRetry, onReset
               <span className="text-[10px] text-gold font-sans">{fitAnalysis.score}%</span>
             </div>
           </div>
-          <p className="text-[11px] text-gray/80 font-body leading-relaxed">
-            {fitAnalysis.advice}
-          </p>
+          <p className="text-[11px] text-gray/80 font-body leading-relaxed">{fitAnalysis.advice}</p>
         </motion.div>
       )}
 
@@ -888,10 +973,9 @@ function ResultPanel({ resultUrl, selectedProduct, fitAnalysis, onRetry, onReset
         </div>
         <Link
           to={`/product/${selectedProduct.id}`}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gold text-black text-[10px] tracking-widest font-sans hover:bg-cream transition-colors group"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gold text-black text-[10px] tracking-widest font-sans hover:bg-cream transition-colors"
         >
-          <ShoppingBag size={12} />
-          VIEW & BUY
+          <ShoppingBag size={12} /> VIEW & BUY
         </Link>
       </div>
 
@@ -901,11 +985,11 @@ function ResultPanel({ resultUrl, selectedProduct, fitAnalysis, onRetry, onReset
           onClick={handleDownload}
           className="flex-1 py-2.5 text-[10px] tracking-widest font-sans border border-white/10 text-gray hover:text-cream hover:border-white/20 transition-all flex items-center justify-center gap-1.5"
         >
-          <Download size={11} /> SAVE IMAGE
+          <Download size={11} /> {videoUrl ? 'SAVE VIDEO' : 'SAVE IMAGE'}
         </button>
         <button
           onClick={onRetry}
-          className="flex-1 py-2.5 text-[10px] tracking-widest font-sans border border-white/10 text-gray hover:text-cream hover:border-white/20 transition-all flex items-center justify-center gap-1.5"
+          className="flex-1 py-2.5 text-[10px] tracking-widests font-sans border border-white/10 text-gray hover:text-cream hover:border-white/20 transition-all flex items-center justify-center gap-1.5"
         >
           <RefreshCw size={11} /> TRY ANOTHER
         </button>

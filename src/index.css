@@ -127,3 +127,12 @@
 .leaflet-popup-close-button {
   color: #868686 !important;
 }
+
+/* ── Try-On: image perspective rotation (while video generates) ── */
+@keyframes tryon-rotate {
+  0%   { transform: perspective(900px) rotateY(0deg); }
+  25%  { transform: perspective(900px) rotateY(14deg); }
+  50%  { transform: perspective(900px) rotateY(0deg); }
+  75%  { transform: perspective(900px) rotateY(-14deg); }
+  100% { transform: perspective(900px) rotateY(0deg); }
+}
