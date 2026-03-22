@@ -85,7 +85,7 @@ export default function SuperHeader() {
       className="hidden md:block fixed z-40 left-0 right-0 border-b border-white/[0.06]"
       style={{ top: '57px', background: 'rgba(0,0,0,0.97)', backdropFilter: 'blur(16px)' }}
     >
-      <nav className="flex items-center gap-0 px-8 h-[46px] overflow-x-auto scrollbar-none md:ml-[220px]">
+      <nav className="flex items-center gap-0 px-8 h-[46px] md:ml-[220px]">
         {CATEGORIES.map((cat) => (
           <CategoryItem key={cat.id} cat={cat} />
         ))}
