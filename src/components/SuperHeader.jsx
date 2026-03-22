@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Sparkles, Map } from 'lucide-react'
 import { brands } from '../data/mockData'
 
 const EASE = [0.76, 0, 0.24, 1]
@@ -11,15 +11,19 @@ const CATEGORIES = [
     id: 'new',
     label: 'NEW IN',
     highlight: 'gold',
-    sections: null,
+    sections: {
+      'JUST DROPPED': ['New Arrivals', 'Trending Now', 'Editor\'s Pick', 'Back in Stock'],
+      WOMEN:  ['Dresses', 'Tops', 'Outerwear', 'Accessories'],
+      MEN:    ['Shirts', 'Knitwear', 'Outerwear', 'Shoes'],
+    },
   },
   {
     id: 'women',
     label: 'WOMEN',
     sections: {
-      CLOTHING: ['Dresses', 'Tops & T-Shirts', 'Shirts & Blouses', 'Knitwear', 'Coats & Jackets', 'Trousers', 'Skirts', 'Jeans', 'Lingerie'],
-      SHOES: ['Sandals', 'Heels & Pumps', 'Flats', 'Sneakers', 'Boots', 'Mules'],
-      BAGS: ['Shoulder Bags', 'Tote Bags', 'Clutches', 'Backpacks', 'Mini Bags'],
+      CLOTHING:    ['Dresses', 'Tops & T-Shirts', 'Shirts & Blouses', 'Knitwear', 'Coats & Jackets', 'Trousers', 'Skirts', 'Jeans', 'Lingerie'],
+      SHOES:       ['Sandals', 'Heels & Pumps', 'Flats', 'Sneakers', 'Boots', 'Mules'],
+      BAGS:        ['Shoulder Bags', 'Tote Bags', 'Clutches', 'Backpacks', 'Mini Bags'],
       ACCESSORIES: ['Jewellery', 'Sunglasses', 'Scarves & Wraps', 'Belts', 'Hats'],
     },
   },
@@ -27,9 +31,9 @@ const CATEGORIES = [
     id: 'men',
     label: 'MEN',
     sections: {
-      CLOTHING: ['T-Shirts & Vests', 'Shirts', 'Knitwear', 'Coats & Jackets', 'Trousers', 'Jeans', 'Shorts', 'Suits'],
-      SHOES: ['Sneakers', 'Boots', 'Loafers', 'Sandals', 'Derby & Formal'],
-      BAGS: ['Backpacks', 'Messenger Bags', 'Tote Bags', 'Belt Bags'],
+      CLOTHING:    ['T-Shirts & Vests', 'Shirts', 'Knitwear', 'Coats & Jackets', 'Trousers', 'Jeans', 'Shorts', 'Suits'],
+      SHOES:       ['Sneakers', 'Boots', 'Loafers', 'Sandals', 'Derby & Formal'],
+      BAGS:        ['Backpacks', 'Messenger Bags', 'Tote Bags', 'Belt Bags'],
       ACCESSORIES: ['Watches', 'Sunglasses', 'Scarves', 'Belts', 'Hats & Caps'],
     },
   },
@@ -37,10 +41,10 @@ const CATEGORIES = [
     id: 'kids',
     label: 'KIDS',
     sections: {
-      GIRLS: ['Dresses', 'Tops', 'Coats & Jackets', 'Trousers', 'Accessories'],
-      BOYS: ['T-Shirts', 'Shirts', 'Outerwear', 'Trousers', 'Accessories'],
+      GIRLS:  ['Dresses', 'Tops', 'Coats & Jackets', 'Trousers', 'Accessories'],
+      BOYS:   ['T-Shirts', 'Shirts', 'Outerwear', 'Trousers', 'Accessories'],
       BABIES: ['Clothing Sets', 'Bodysuits', 'Outerwear', 'Footwear'],
-      SHOES: ['Sneakers', 'Sandals', 'Boots', 'School Shoes'],
+      SHOES:  ['Sneakers', 'Sandals', 'Boots', 'School Shoes'],
     },
   },
   {
@@ -50,10 +54,22 @@ const CATEGORIES = [
     sections: null,
   },
   {
+    id: 'try-on',
+    label: 'TRY ON',
+    isLink: '/try-on',
+    highlight: null,
+    sections: null,
+    icon: Sparkles,
+  },
+  {
     id: 'sale',
     label: 'SALE',
     highlight: 'red',
-    sections: null,
+    sections: {
+      WOMEN: ['Dresses', 'Tops', 'Shoes', 'Bags', 'Accessories'],
+      MEN:   ['Shirts', 'Trousers', 'Shoes', 'Accessories'],
+      KIDS:  ['Clothing', 'Shoes', 'Accessories'],
+    },
   },
 ]
 
@@ -93,6 +109,7 @@ function CategoryItem({ cat }) {
   }, [])
 
   const handleClick = () => {
+    if (cat.isLink) { navigate(cat.isLink); return }
     if (!cat.sections && !cat.isBrands) {
       navigate(`/home?gender=${cat.id}`)
     }
@@ -103,6 +120,8 @@ function CategoryItem({ cat }) {
     cat.highlight === 'red'  ? '#af0000' :
     null
 
+  const Icon = cat.icon || null
+
   return (
     <div
       className="relative h-full flex-shrink-0"
@@ -111,11 +130,12 @@ function CategoryItem({ cat }) {
     >
       <button
         onClick={handleClick}
-        className={`h-full flex items-center gap-1 px-4 text-[11px] tracking-widest font-sans transition-colors duration-200 whitespace-nowrap relative group ${
+        className={`h-full flex items-center gap-1.5 px-4 text-[11px] tracking-widest font-sans transition-colors duration-200 whitespace-nowrap relative group ${
           open ? 'text-cream' : 'text-gray hover:text-cream'
         }`}
         style={labelColor ? { color: labelColor } : {}}
       >
+        {Icon && <Icon size={11} style={{ opacity: 0.7 }} />}
         {cat.label}
         {(cat.sections || cat.isBrands) && (
           <ChevronDown
@@ -150,6 +170,8 @@ function MegaMenu({ cat, onMouseEnter, onMouseLeave }) {
 
   const go = (params) => navigate(`/home?${new URLSearchParams(params).toString()}`)
 
+  const toSlug = (str) => str.toLowerCase().replace(/[^a-z]/g, '-').replace(/-+/g, '-')
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -8, clipPath: 'inset(0 0 100% 0)' }}
@@ -176,7 +198,7 @@ function MegaMenu({ cat, onMouseEnter, onMouseLeave }) {
                   {items.map((item) => (
                     <li key={item}>
                       <button
-                        onClick={() => go({ gender: cat.id, category: item.toLowerCase().replace(/[^a-z]/g, '-') })}
+                        onClick={() => go({ gender: cat.id, category: toSlug(item) })}
                         className="text-[12px] text-gray hover:text-cream font-sans transition-colors duration-200 text-left leading-snug"
                       >
                         {item}
@@ -188,7 +210,7 @@ function MegaMenu({ cat, onMouseEnter, onMouseLeave }) {
             ))}
           </div>
 
-          {/* View all link */}
+          {/* View all + editorial tag */}
           <div className="mt-8 pt-5 border-t border-white/[0.06] flex items-center justify-between">
             <button
               onClick={() => go({ gender: cat.id })}

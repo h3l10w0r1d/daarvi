@@ -1,13 +1,13 @@
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Map, User, Home, Sparkles, ShoppingBag, Menu, X } from 'lucide-react'
+import { User, ShoppingBag, Menu, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 
 const EASE = [0.76, 0, 0.24, 1]
 
 export default function Navbar() {
   const location = useLocation()
-  const { mode, toggleMode, cartCount, user, mobileSidebarOpen, setMobileSidebarOpen } = useApp()
+  const { cartCount, user, mobileSidebarOpen, setMobileSidebarOpen } = useApp()
   const hide = ['/', '/login', '/onboarding'].includes(location.pathname)
 
   if (hide) return null
@@ -39,32 +39,8 @@ export default function Navbar() {
         </Link>
       </div>
 
-      {/* Centre: Page nav — hidden on mobile */}
-      <div className="hidden md:flex items-center gap-6">
-        <NavLink to="/home"   icon={<Home size={15} />}     label="Home"   active={location.pathname === '/home'} />
-        <NavLink to="/map"    icon={<Map size={15} />}      label="Map"    active={location.pathname === '/map'} />
-        <NavLink to="/try-on" icon={<Sparkles size={15} />} label="Try On" active={location.pathname === '/try-on'} />
-      </div>
-
-      {/* Right: Mode toggle + Account + Bag */}
+      {/* Right: Account + Bag */}
       <div className="flex items-center gap-3 md:gap-5">
-        {/* Global / Local toggle — hidden on mobile */}
-        <button
-          onClick={toggleMode}
-          className="hidden md:flex items-center gap-0 text-xs font-sans tracking-widest border border-white/20 overflow-hidden"
-        >
-          <span className={`px-3 py-1.5 transition-all duration-300 ${
-            mode === 'global' ? 'bg-gold text-black font-medium' : 'text-gray'
-          }`}>
-            GLOBAL
-          </span>
-          <span className={`px-3 py-1.5 transition-all duration-300 ${
-            mode === 'local' ? 'bg-red text-cream font-medium' : 'text-gray'
-          }`}>
-            LOCAL
-          </span>
-        </button>
-
         {/* Account */}
         <Link to="/account" title={user ? user.name || 'Account' : 'Account'} className="relative group">
           <User size={18} className="text-gray group-hover:text-gold transition-colors duration-300" />
@@ -89,27 +65,5 @@ export default function Navbar() {
         </Link>
       </div>
     </motion.nav>
-  )
-}
-
-function NavLink({ to, icon, label, active }) {
-  return (
-    <Link
-      to={to}
-      className={`flex items-center gap-1.5 text-xs tracking-widest font-sans relative group transition-colors ${
-        active ? 'text-gold' : 'text-gray hover:text-cream'
-      }`}
-    >
-      {icon}
-      <span>{label.toUpperCase()}</span>
-      <motion.span
-        className="absolute -bottom-0.5 left-0 h-px bg-gold"
-        initial={{ scaleX: active ? 1 : 0 }}
-        animate={{ scaleX: active ? 1 : 0 }}
-        whileHover={{ scaleX: 1 }}
-        style={{ width: '100%', transformOrigin: 'left' }}
-        transition={{ duration: 0.3, ease: EASE }}
-      />
-    </Link>
   )
 }

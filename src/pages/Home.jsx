@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { Map, ArrowRight, SlidersHorizontal, Loader2 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
@@ -10,9 +10,45 @@ import { ProductCardSkeleton } from '../components/Skeleton'
 const categories = ['all', 'outerwear', 'tops', 'bottoms', 'dresses', 'accessories']
 const EASE = [0.76, 0, 0.24, 1]
 
+// Maps SuperHeader subcategory slugs → Home filter categories
+const CATEGORY_MAP = {
+  'dresses': 'dresses',
+  'tops-t-shirts': 'tops', 'shirts-blouses': 'tops', 'knitwear': 'tops',
+  't-shirts-vests': 'tops', 'shirts': 'tops',
+  'coats-jackets': 'outerwear', 'outerwear': 'outerwear',
+  'trousers': 'bottoms', 'skirts': 'bottoms', 'jeans': 'bottoms',
+  'shorts': 'bottoms', 'suits': 'bottoms',
+  'sandals': 'accessories', 'heels-pumps': 'accessories', 'flats': 'accessories',
+  'sneakers': 'accessories', 'boots': 'accessories', 'mules': 'accessories',
+  'loafers': 'accessories', 'derby-formal': 'accessories',
+  'shoulder-bags': 'accessories', 'tote-bags': 'accessories', 'clutches': 'accessories',
+  'backpacks': 'accessories', 'mini-bags': 'accessories', 'belt-bags': 'accessories',
+  'messenger-bags': 'accessories',
+  'jewellery': 'accessories', 'sunglasses': 'accessories', 'scarves-wraps': 'accessories',
+  'belts': 'accessories', 'hats': 'accessories', 'watches': 'accessories',
+  'scarves': 'accessories', 'hats-caps': 'accessories',
+}
+
 export default function Home() {
   const { mode, toggleMode, dnaProfile } = useApp()
+  const [searchParams] = useSearchParams()
   const [activeCategory, setActiveCategory] = useState('all')
+
+  // Sync category from SuperHeader URL params
+  useEffect(() => {
+    const cat = searchParams.get('category')
+    const gender = searchParams.get('gender')
+    if (cat) {
+      const mapped = CATEGORY_MAP[cat] || (categories.includes(cat) ? cat : null)
+      if (mapped) { setActiveCategory(mapped); return }
+    }
+    if (gender === 'sale' || gender === 'new') {
+      setActiveCategory('all')
+      return
+    }
+    // gender alone (women/men/kids) = show all
+    if (gender) setActiveCategory('all')
+  }, [searchParams])
 
   const {
     data,

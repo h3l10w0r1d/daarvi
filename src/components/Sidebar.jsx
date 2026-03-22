@@ -9,7 +9,6 @@ const EASE = [0.76, 0, 0.24, 1]
 const globalNav = [
   { to: '/home', icon: Home, label: 'Home' },
   { to: '/home?cat=all', icon: Globe2, label: 'Collections' },
-  { to: '/map', icon: Map, label: 'World Map' },
   { to: '/try-on', icon: Sparkles, label: 'Try On' },
 ]
 
