@@ -49,6 +49,7 @@ export default function ProductCard({ product, index = 0 }) {
         {/* ── Image container ───────────────────────────── */}
         <div
           className="relative overflow-hidden aspect-[2/3] bg-neutral-950"
+          style={{ touchAction: 'pan-y' }}   /* pan-y = browser handles vertical scroll; we handle horizontal swipe */
           onMouseEnter={() => secondaryImage && setShowSecondary(true)}
           onMouseLeave={() => setShowSecondary(false)}
           onTouchStart={handleTouchStart}

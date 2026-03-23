@@ -14,7 +14,8 @@
   }
 
   html {
-    /* scroll-behavior removed — Lenis handles smooth scroll */
+    /* overflow-x here, NOT on body — body overflow-x:hidden kills vertical scroll on iOS Safari */
+    overflow-x: hidden;
   }
 
   body {
@@ -23,7 +24,6 @@
     font-family: 'Space Grotesk', 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
   }
 
   /* Luxury grain texture overlay */
