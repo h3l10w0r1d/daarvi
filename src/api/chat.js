@@ -15,7 +15,8 @@ export function streamOutfitChat({ messages, outfitContext = '', onToken, onDone
 
   // Build the Authorization header the same way axios client does
   const token = localStorage.getItem('access_token') ?? sessionStorage.getItem('access_token') ?? ''
-  const baseURL = client.defaults.baseURL ?? ''
+  // Strip trailing slash so we never get //chat/outfit-assistant
+  const baseURL = (client.defaults.baseURL ?? '').replace(/\/$/, '')
 
   fetch(`${baseURL}/chat/outfit-assistant`, {
     method: 'POST',
