@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, Map, Sparkles, Dna, Store, Globe2, Navigation, ShoppingBag, Settings, X } from 'lucide-react'
+import { Home, Map, Sparkles, Dna, Store, Globe2, Navigation, ShoppingBag, Settings, X, Star } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 
 const EASE = [0.76, 0, 0.24, 1]
 
 const globalNav = [
-  { to: '/home', icon: Home, label: 'Home' },
+  { to: '/home',     icon: Home,     label: 'Home' },
   { to: '/home?cat=all', icon: Globe2, label: 'Collections' },
-  { to: '/try-on', icon: Sparkles, label: 'Try On' },
+  { to: '/featured', icon: Star,     label: 'Featured' },
+  { to: '/try-on',   icon: Sparkles, label: 'Try On' },
 ]
 
 const localNav = [
-  { to: '/home', icon: Home, label: 'Home' },
-  { to: '/home?cat=all', icon: Store, label: 'Nearby Stores' },
-  { to: '/map', icon: Navigation, label: 'City Map' },
-  { to: '/try-on', icon: Sparkles, label: 'Try On' },
+  { to: '/home',     icon: Home,       label: 'Home' },
+  { to: '/home?cat=all', icon: Store,  label: 'Nearby Stores' },
+  { to: '/featured', icon: Star,       label: 'Featured' },
+  { to: '/map',      icon: Navigation, label: 'City Map' },
+  { to: '/try-on',   icon: Sparkles,   label: 'Try On' },
 ]
 
 export default function Sidebar() {
