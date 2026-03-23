@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, Sparkles, Map } from 'lucide-react'
+import { ChevronDown, Sparkles } from 'lucide-react'
 import { brands } from '../data/mockData'
 
 const EASE = [0.76, 0, 0.24, 1]
@@ -12,9 +12,9 @@ const CATEGORIES = [
     label: 'NEW IN',
     highlight: 'gold',
     sections: {
-      'JUST DROPPED': ['New Arrivals', 'Trending Now', 'Editor\'s Pick', 'Back in Stock'],
-      WOMEN:  ['Dresses', 'Tops', 'Outerwear', 'Accessories'],
-      MEN:    ['Shirts', 'Knitwear', 'Outerwear', 'Shoes'],
+      'JUST DROPPED': ['New Arrivals', 'Trending Now', "Editor's Pick", 'Back in Stock'],
+      WOMEN:          ['Dresses', 'Tops', 'Outerwear', 'Accessories'],
+      MEN:            ['Shirts', 'Knitwear', 'Outerwear', 'Shoes'],
     },
   },
   {
@@ -48,6 +48,16 @@ const CATEGORIES = [
     },
   },
   {
+    id: 'sport',
+    label: 'SPORT',
+    sections: {
+      SKIING:      ['Ski Jackets', 'Ski Pants', 'Base Layers', 'Gloves & Mitts', 'Ski Helmets', 'Goggles', 'Ski Boots'],
+      SNOWBOARD:   ['Snowboard Jackets', 'Snowboard Pants', 'Boots', 'Bindings', 'Helmets'],
+      ACTIVEWEAR:  ['Gym Wear', 'Running', 'Yoga', 'Cycling', 'Swimming', 'Compression'],
+      FOOTWEAR:    ['Trainers', 'Trail Running', 'Hiking Boots', 'Football Boots', 'Water Shoes'],
+    },
+  },
+  {
     id: 'designers',
     label: 'DESIGNERS',
     isBrands: true,
@@ -69,6 +79,7 @@ const CATEGORIES = [
       WOMEN: ['Dresses', 'Tops', 'Shoes', 'Bags', 'Accessories'],
       MEN:   ['Shirts', 'Trousers', 'Shoes', 'Accessories'],
       KIDS:  ['Clothing', 'Shoes', 'Accessories'],
+      SPORT: ['Ski Wear', 'Activewear', 'Footwear'],
     },
   },
 ]
@@ -82,10 +93,10 @@ export default function SuperHeader() {
 
   return (
     <div
-      className="hidden md:block fixed z-40 left-0 right-0 border-b border-white/[0.06]"
+      className="hidden md:block fixed z-40 left-0 right-0 border-b border-white/[0.08]"
       style={{ top: '57px', background: 'rgba(0,0,0,0.97)', backdropFilter: 'blur(16px)' }}
     >
-      <nav className="flex items-center gap-0 px-8 h-[46px] md:ml-[220px]">
+      <nav className="flex items-center gap-0 px-8 h-[58px] md:ml-[220px]">
         {CATEGORIES.map((cat) => (
           <CategoryItem key={cat.id} cat={cat} />
         ))}
@@ -110,9 +121,7 @@ function CategoryItem({ cat }) {
 
   const handleClick = () => {
     if (cat.isLink) { navigate(cat.isLink); return }
-    if (!cat.sections && !cat.isBrands) {
-      navigate(`/home?gender=${cat.id}`)
-    }
+    if (!cat.sections && !cat.isBrands) navigate(`/home?gender=${cat.id}`)
   }
 
   const labelColor =
@@ -130,28 +139,27 @@ function CategoryItem({ cat }) {
     >
       <button
         onClick={handleClick}
-        className={`h-full flex items-center gap-1.5 px-4 text-[11px] tracking-widest font-sans transition-colors duration-200 whitespace-nowrap relative group ${
+        className={`h-full flex items-center gap-2 px-5 text-[13px] tracking-[0.12em] font-sans transition-colors duration-200 whitespace-nowrap relative group ${
           open ? 'text-cream' : 'text-gray hover:text-cream'
         }`}
         style={labelColor ? { color: labelColor } : {}}
       >
-        {Icon && <Icon size={11} style={{ opacity: 0.7 }} />}
+        {Icon && <Icon size={13} style={{ opacity: 0.75 }} />}
         {cat.label}
         {(cat.sections || cat.isBrands) && (
           <ChevronDown
-            size={10}
+            size={11}
             className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
             style={{ opacity: 0.5 }}
           />
         )}
         {/* Active underline */}
         <span
-          className="absolute bottom-0 left-4 right-4 h-px bg-gold transition-all duration-300"
+          className="absolute bottom-0 left-5 right-5 h-[2px] bg-gold transition-all duration-300"
           style={{ opacity: open ? 1 : 0, transform: open ? 'scaleX(1)' : 'scaleX(0)', transformOrigin: 'left' }}
         />
       </button>
 
-      {/* Mega-menu dropdown */}
       <AnimatePresence>
         {open && (
           <MegaMenu
@@ -167,9 +175,7 @@ function CategoryItem({ cat }) {
 
 function MegaMenu({ cat, onMouseEnter, onMouseLeave }) {
   const navigate = useNavigate()
-
   const go = (params) => navigate(`/home?${new URLSearchParams(params).toString()}`)
-
   const toSlug = (str) => str.toLowerCase().replace(/[^a-z]/g, '-').replace(/-+/g, '-')
 
   return (
@@ -182,24 +188,27 @@ function MegaMenu({ cat, onMouseEnter, onMouseLeave }) {
       onMouseLeave={onMouseLeave}
       className="absolute left-0 top-full border border-white/[0.08] border-t-0 z-50"
       style={{
-        background: 'rgba(4,4,4,0.98)',
+        background: 'rgba(4,4,4,0.99)',
         backdropFilter: 'blur(20px)',
-        minWidth: cat.isBrands ? '560px' : '640px',
+        minWidth: cat.isBrands ? '600px' : '700px',
       }}
     >
       {/* Standard category mega-menu */}
       {cat.sections && (
-        <div className="p-8">
-          <div className="grid gap-8" style={{ gridTemplateColumns: `repeat(${Object.keys(cat.sections).length}, 1fr)` }}>
+        <div className="p-10">
+          <div
+            className="grid gap-10"
+            style={{ gridTemplateColumns: `repeat(${Object.keys(cat.sections).length}, 1fr)` }}
+          >
             {Object.entries(cat.sections).map(([group, items]) => (
               <div key={group}>
-                <p className="text-[9px] tracking-[0.2em] text-gold/70 font-sans mb-4">{group}</p>
-                <ul className="space-y-2.5">
+                <p className="text-[11px] tracking-[0.2em] text-gold/80 font-sans mb-5 uppercase">{group}</p>
+                <ul className="space-y-3">
                   {items.map((item) => (
                     <li key={item}>
                       <button
                         onClick={() => go({ gender: cat.id, category: toSlug(item) })}
-                        className="text-[12px] text-gray hover:text-cream font-sans transition-colors duration-200 text-left leading-snug"
+                        className="text-[14px] text-gray/80 hover:text-cream font-sans transition-colors duration-200 text-left leading-snug"
                       >
                         {item}
                       </button>
@@ -210,11 +219,10 @@ function MegaMenu({ cat, onMouseEnter, onMouseLeave }) {
             ))}
           </div>
 
-          {/* View all + editorial tag */}
           <div className="mt-8 pt-5 border-t border-white/[0.06] flex items-center justify-between">
             <button
               onClick={() => go({ gender: cat.id })}
-              className="text-[10px] tracking-widest text-gold font-sans hover:text-cream transition-colors duration-200 flex items-center gap-2"
+              className="text-[12px] tracking-widest text-gold font-sans hover:text-cream transition-colors duration-200 flex items-center gap-2"
             >
               VIEW ALL {cat.label} →
             </button>
@@ -225,8 +233,8 @@ function MegaMenu({ cat, onMouseEnter, onMouseLeave }) {
 
       {/* Designers / Brands mega-menu */}
       {cat.isBrands && (
-        <div className="p-8">
-          <p className="text-[9px] tracking-[0.2em] text-gold/70 font-sans mb-6">OUR BRANDS</p>
+        <div className="p-10">
+          <p className="text-[11px] tracking-[0.2em] text-gold/80 font-sans mb-6 uppercase">Our Brands</p>
           <div className="grid grid-cols-3 gap-4">
             {BRAND_LIST.map((brand) => (
               <Link
@@ -235,14 +243,14 @@ function MegaMenu({ cat, onMouseEnter, onMouseLeave }) {
                 className="group flex items-start gap-3 p-3 border border-white/[0.06] hover:border-gold/30 transition-colors duration-300"
               >
                 <div
-                  className="w-8 h-8 flex-shrink-0 bg-cover bg-center border border-white/10"
+                  className="w-10 h-10 flex-shrink-0 bg-cover bg-center border border-white/10"
                   style={{ backgroundImage: `url(${brand.cover})` }}
                 />
                 <div>
-                  <p className="text-[11px] tracking-widest text-cream font-sans group-hover:text-gold transition-colors duration-200">
+                  <p className="text-[13px] tracking-widest text-cream font-sans group-hover:text-gold transition-colors duration-200">
                     {brand.name}
                   </p>
-                  <p className="text-[10px] text-gray/50 font-body mt-0.5">{brand.location}</p>
+                  <p className="text-[11px] text-gray/50 font-body mt-0.5">{brand.location}</p>
                 </div>
               </Link>
             ))}
@@ -250,7 +258,7 @@ function MegaMenu({ cat, onMouseEnter, onMouseLeave }) {
           <div className="mt-6 pt-4 border-t border-white/[0.06]">
             <Link
               to="/home"
-              className="text-[10px] tracking-widest text-gold font-sans hover:text-cream transition-colors duration-200"
+              className="text-[12px] tracking-widest text-gold font-sans hover:text-cream transition-colors duration-200"
             >
               VIEW ALL DESIGNERS →
             </Link>

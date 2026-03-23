@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
-import { Map, ArrowRight, SlidersHorizontal, Loader2 } from 'lucide-react'
+import { ArrowRight, SlidersHorizontal } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { useProductsInfinite, useRecommended } from '../hooks/useProducts'
 import ProductCard from '../components/ProductCard'
@@ -104,24 +104,9 @@ export default function Home() {
 
       {/* Products */}
       <section className="px-8 md:px-16 pb-32">
-        {/* Filters + count */}
-        <div className="flex items-center justify-between py-8 border-b border-white/10 mb-8 flex-wrap gap-4">
-          <div className="flex items-center gap-1 flex-wrap">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-1.5 text-[10px] tracking-widest font-sans transition-all duration-300 ${
-                  activeCategory === cat
-                    ? mode === 'local' ? 'bg-red text-cream' : 'bg-gold text-black'
-                    : 'text-gray hover:text-cream'
-                }`}
-              >
-                {cat.toUpperCase()}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-2 text-[10px] text-gray font-sans">
+        {/* Item count */}
+        <div className="flex items-center justify-end py-6 border-b border-white/10 mb-8">
+          <div className="flex items-center gap-2 text-[11px] text-gray font-sans">
             <SlidersHorizontal size={13} />
             <span>
               {isLoading
@@ -198,8 +183,6 @@ export default function Home() {
         <div ref={sentinelRef} className="h-1" />
       </section>
 
-      {/* Map preview */}
-      <MapPreview mode={mode} />
     </div>
   )
 }
@@ -281,41 +264,3 @@ function RecommendedSection({ dnaProfile }) {
   )
 }
 
-function MapPreview({ mode }) {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true })
-
-  return (
-    <section ref={ref} className="mx-8 md:mx-16 mb-16 border border-white/10">
-      <motion.div
-        initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }}
-        animate={inView ? { opacity: 1, clipPath: 'inset(0 0 0% 0)' } : {}}
-        transition={{ duration: 0.7, ease: EASE }}
-        className="relative overflow-hidden"
-      >
-        <div className={`p-10 flex items-center justify-between ${mode === 'local' ? 'bg-red/5' : 'bg-gold/5'}`}>
-          <div>
-            <Map size={28} className={mode === 'local' ? 'text-red mb-4' : 'text-gold mb-4'} />
-            <h3 className="font-serif text-2xl text-cream mb-2">
-              {mode === 'local' ? 'Stores Near You' : 'Global Store Map'}
-            </h3>
-            <p className="text-sm text-gray font-body">
-              {mode === 'local'
-                ? 'Explore boutiques in your area on the interactive map'
-                : 'Discover brand flagships and partners worldwide'}
-            </p>
-          </div>
-          <Link
-            to="/map"
-            className={`flex items-center gap-2 px-8 py-4 text-xs tracking-widest font-sans group transition-all duration-300 ${
-              mode === 'local' ? 'bg-red text-cream hover:bg-cream hover:text-black' : 'bg-gold text-black hover:bg-cream'
-            }`}
-          >
-            OPEN MAP
-            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-      </motion.div>
-    </section>
-  )
-}

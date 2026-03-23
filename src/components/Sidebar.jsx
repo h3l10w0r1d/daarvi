@@ -209,7 +209,20 @@ function ModeBtn({ label, active, color, onClick }) {
 
 function NavItem({ item, location, dim = false }) {
   const Icon = item.icon
-  const isActive = location.pathname === item.to || (item.to !== '/home' && location.pathname.startsWith(item.to.split('?')[0]))
+  // Build path and query from the item's `to`
+  const [toPath, toQuery] = item.to.split('?')
+  const isActive = (() => {
+    if (location.pathname !== toPath) return false
+    // If item has a query string, the current URL must also have that exact query param
+    if (toQuery) {
+      const sp = new URLSearchParams(location.search)
+      const tsp = new URLSearchParams(toQuery)
+      for (const [k, v] of tsp) { if (sp.get(k) !== v) return false }
+      return true
+    }
+    // Item with no query → only active when current URL has no significant query params
+    return !location.search || location.search === ''
+  })()
   const EASE = [0.76, 0, 0.24, 1]
 
   return (
