@@ -14,8 +14,7 @@
   }
 
   html {
-    /* overflow-x here, NOT on body — body overflow-x:hidden kills vertical scroll on iOS Safari */
-    overflow-x: hidden;
+    /* no overflow override — let viewport scroll naturally */
   }
 
   body {
@@ -24,6 +23,9 @@
     font-family: 'Space Grotesk', 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* clip (not hidden) — clips horizontal overflow without creating a new
+       scroll container, so vertical scroll still works on iOS Safari */
+    overflow-x: clip;
   }
 
   /* Luxury grain texture overlay */
