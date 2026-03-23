@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Sparkles } from 'lucide-react'
@@ -110,14 +110,14 @@ function CategoryItem({ cat }) {
   const navigate = useNavigate()
   const closeTimer = useRef(null)
 
-  const handleMouseEnter = useCallback(() => {
+  const handleMouseEnter = () => {
     clearTimeout(closeTimer.current)
     if (cat.sections || cat.isBrands) setOpen(true)
-  }, [cat])
+  }
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = () => {
     closeTimer.current = setTimeout(() => setOpen(false), 180)
-  }, [])
+  }
 
   const handleClick = () => {
     if (cat.isLink) { navigate(cat.isLink); return }
