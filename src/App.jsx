@@ -17,11 +17,12 @@ import MapView from './pages/MapView'
 import ProductDetail from './pages/ProductDetail'
 import BrandPage from './pages/BrandPage'
 import Featured from './pages/Featured'
+import LookPicker from './pages/LookPicker'
 import TryOn from './pages/TryOn'
 import Checkout from './pages/Checkout'
 import Account from './pages/Account'
 
-const SIDEBAR_PAGES = ['/home', '/map', '/try-on', '/featured', '/product', '/brand', '/checkout', '/account']
+const SIDEBAR_PAGES = ['/home', '/map', '/try-on', '/featured', '/look-picker', '/product', '/brand', '/checkout', '/account']
 const NO_HEADERS   = ['/', '/login', '/onboarding']
 
 function AppRoutes() {
@@ -52,7 +53,8 @@ function AppRoutes() {
             <Route path="/map"        element={<ProtectedRoute><MapView /></ProtectedRoute>} />
             <Route path="/product/:id"      element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
             <Route path="/brand/:brandId"   element={<ProtectedRoute><BrandPage /></ProtectedRoute>} />
-            <Route path="/featured"  element={<ProtectedRoute><Featured /></ProtectedRoute>} />
+            <Route path="/featured"    element={<ProtectedRoute><Featured /></ProtectedRoute>} />
+            <Route path="/look-picker" element={<ProtectedRoute><LookPicker /></ProtectedRoute>} />
             <Route path="/try-on"    element={<ProtectedRoute><TryOn /></ProtectedRoute>} />
             <Route path="/checkout"  element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
             <Route path="/account"   element={<ProtectedRoute><Account /></ProtectedRoute>} />
