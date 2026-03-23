@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { AppProvider } from './context/AppContext'
 import { ToastProvider } from './components/Toast'
+import ErrorBoundary from './components/ErrorBoundary'
 import Sidebar from './components/Sidebar'
 import Navbar from './components/Navbar'
 import SuperHeader from './components/SuperHeader'
@@ -73,7 +74,9 @@ export default function App() {
     <BrowserRouter>
       <AppProvider>
         <ToastProvider>
-          <AppRoutes />
+          <ErrorBoundary>
+            <AppRoutes />
+          </ErrorBoundary>
         </ToastProvider>
       </AppProvider>
     </BrowserRouter>
