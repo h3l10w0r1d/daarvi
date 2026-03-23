@@ -21,6 +21,10 @@ export default function ProductDetail() {
   const [selectedColor, setSelectedColor] = useState(null)
   const [addedToCart, setAddedToCart] = useState(false)
 
+  // Touch refs — must be declared before any early return
+  const touchStartX = useRef(0)
+  const touchStartY = useRef(0)
+
   // Fetch related products (same category)
   const { data: allProducts = [] } = useProducts(product ? { category: product.category } : {})
   const related = allProducts.filter(p => p.id !== id).slice(0, 4)
@@ -64,8 +68,6 @@ export default function ProductDetail() {
   const nextImage = () => setImageIndex(i => (i + 1) % imageUrls.length)
 
   // Touch / swipe handling for mobile gallery
-  const touchStartX = useRef(0)
-  const touchStartY = useRef(0)
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX
     touchStartY.current = e.touches[0].clientY
