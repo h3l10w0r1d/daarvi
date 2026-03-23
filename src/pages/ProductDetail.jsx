@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Sparkles, Truck, MapPin, Heart, ShoppingBag, ChevronLeft, ChevronRight, Check } from 'lucide-react'
@@ -63,6 +63,23 @@ export default function ProductDetail() {
   const prevImage = () => setImageIndex(i => (i - 1 + imageUrls.length) % imageUrls.length)
   const nextImage = () => setImageIndex(i => (i + 1) % imageUrls.length)
 
+  // Touch / swipe handling for mobile gallery
+  const touchStartX = useRef(0)
+  const touchStartY = useRef(0)
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
+  const handleTouchEnd = (e) => {
+    if (imageUrls.length <= 1) return
+    const dx = touchStartX.current - e.changedTouches[0].clientX
+    const dy = touchStartY.current - e.changedTouches[0].clientY
+    // Only act on clearly horizontal swipes (dx dominant + > 40px threshold)
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+      dx > 0 ? nextImage() : prevImage()
+    }
+  }
+
   const canBuy = selectedSize && selectedColor
 
   return (
@@ -83,8 +100,13 @@ export default function ProductDetail() {
 
         {/* LEFT — Image gallery */}
         <div className="relative">
-          {/* Main image */}
-          <div className="relative aspect-[3/4] overflow-hidden bg-neutral-950 group">
+          {/* Main image — swipeable on mobile */}
+          <div
+            className="relative aspect-[3/4] overflow-hidden bg-neutral-950 group select-none"
+            style={{ touchAction: 'pan-y' }}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={imageIndex}
@@ -104,26 +126,41 @@ export default function ProductDetail() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Gallery nav arrows */}
+            {/* Gallery nav arrows — always visible on mobile, hover-only on desktop */}
             {imageUrls.length > 1 && (
               <>
                 <button
                   onClick={prevImage}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 flex items-center justify-center text-gray hover:text-cream hover:bg-black/90 transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 flex items-center justify-center text-gray hover:text-cream hover:bg-black/90 transition-all md:opacity-0 md:group-hover:opacity-100"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={18} />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 flex items-center justify-center text-gray hover:text-cream hover:bg-black/90 transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 flex items-center justify-center text-gray hover:text-cream hover:bg-black/90 transition-all md:opacity-0 md:group-hover:opacity-100"
                 >
-                  <ChevronRight size={16} />
+                  <ChevronRight size={18} />
                 </button>
               </>
             )}
 
-            {/* Image counter */}
-            <div className="absolute bottom-3 right-3 text-[9px] tracking-widest text-cream/60 font-sans bg-black/50 px-2 py-1">
+            {/* Dot indicators — mobile only */}
+            {imageUrls.length > 1 && (
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 md:hidden">
+                {imageUrls.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setImageIndex(i)}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                      i === imageIndex ? 'bg-cream w-4' : 'bg-cream/30'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Image counter — desktop only */}
+            <div className="absolute bottom-3 right-3 text-[9px] tracking-widest text-cream/60 font-sans bg-black/50 px-2 py-1 hidden md:block">
               {imageIndex + 1} / {imageUrls.length}
             </div>
           </div>
