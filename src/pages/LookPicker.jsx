@@ -710,7 +710,7 @@ function OutfitRow({ item, scope, selected, selectedSize, onToggle, onSwap, onSe
   const price      = Number(scope === 'local' ? product.price_local : product.price_global)
   const image      = product.images?.[0]?.url ?? product.image ?? ''
   const brandName  = product.brand?.name ?? product.brand ?? ''
-  const sizes      = product.sizes?.map(s => s.size) ?? []
+  const sizes      = product.sizes ?? []
   const needsSize  = sizes.length > 0 && !selectedSize
 
   return (
