@@ -636,6 +636,28 @@ export default function LookPicker() {
       {/* ── Aria AI stylist chatbot ─────────────────────────────────────────── */}
       <OutfitChatbot
         outfitContext={buildOutfitContext(outfit, effectiveItems, selectedIds, selectedSizes, scope)}
+        scope={scope}
+        onAction={(action) => {
+          if (action.type === 'DISPLAY_OUTFIT') {
+            const newOutfit = action.outfit
+            setOutfits(prev => [newOutfit, ...prev.filter(o => o.id !== newOutfit.id)])
+            setActiveIdx(0)
+            const coreIds = newOutfit.items.filter(i => i.is_core).map(i => i.product.id)
+            resetSelections(coreIds)
+          } else if (action.type === 'SWAP_ITEM') {
+            const currentItem = effectiveItems.find(i => i.role === action.role)
+            if (currentItem) {
+              const oldId = currentItem.product.id
+              swapItem(oldId, action.product)
+              if (selectedIds.has(oldId)) {
+                const next = new Set(selectedIds)
+                next.delete(oldId)
+                next.add(action.product.id)
+                selectAll([...next])
+              }
+            }
+          }
+        }}
       />
     </div>
   )
