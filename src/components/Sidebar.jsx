@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, Map, Sparkles, Dna, Store, Globe2, Navigation, ShoppingBag, Settings, X, Star, Layers } from 'lucide-react'
+import { Home, Map, Sparkles, Dna, Store, Globe2, Navigation, ShoppingBag, Settings, X, Star, Layers, LogOut } from 'lucide-react'
 import { useApp } from '../context/AppContext'
+import { useNavigate } from 'react-router-dom'
 
 const EASE = [0.76, 0, 0.24, 1]
 
@@ -25,7 +26,8 @@ const localNav = [
 
 export default function Sidebar() {
   const location = useLocation()
-  const { mode, setMode, user, cartCount, mobileSidebarOpen, setMobileSidebarOpen } = useApp()
+  const navigate = useNavigate()
+  const { mode, setMode, user, logout, cartCount, mobileSidebarOpen, setMobileSidebarOpen } = useApp()
   const hide = ['/', '/login', '/onboarding'].includes(location.pathname)
 
   // Track if mobile
@@ -147,10 +149,17 @@ export default function Sidebar() {
           dim
         />
         {user && (
-          <div className="px-3 pt-3">
-            <p className="text-[9px] tracking-widest text-gray/50 font-sans truncate">
+          <div className="px-3 pt-3 flex items-center justify-between gap-2">
+            <p className="text-[9px] tracking-widest text-gray/50 font-sans truncate flex-1 min-w-0">
               {user.email}
             </p>
+            <button
+              onClick={() => { logout(); navigate('/') }}
+              title="Log out"
+              className="flex-shrink-0 text-gray/40 hover:text-red-400 transition-colors duration-200"
+            >
+              <LogOut size={13} />
+            </button>
           </div>
         )}
       </div>

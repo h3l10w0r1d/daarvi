@@ -7,6 +7,7 @@ import Sidebar from './components/Sidebar'
 import Navbar from './components/Navbar'
 import SuperHeader from './components/SuperHeader'
 import ProtectedRoute from './components/ProtectedRoute'
+import GuestRoute from './components/GuestRoute'
 import OfflineBanner from './components/OfflineBanner'
 import InstallBanner from './components/InstallBanner'
 import Landing from './pages/Landing'
@@ -43,9 +44,9 @@ function AppRoutes() {
       >
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
-            {/* ── Public routes ── */}
-            <Route path="/"           element={<Landing />} />
-            <Route path="/login"      element={<Login />} />
+            {/* ── Public routes — redirect to /home if already logged in ── */}
+            <Route path="/"           element={<GuestRoute><Landing /></GuestRoute>} />
+            <Route path="/login"      element={<GuestRoute><Login /></GuestRoute>} />
             <Route path="/onboarding" element={<Onboarding />} />
 
             {/* ── Protected routes — require JWT ── */}
