@@ -13,7 +13,6 @@ import InstallBanner from './components/InstallBanner'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
-import Home from './pages/Home'
 import MapView from './pages/MapView'
 import ProductDetail from './pages/ProductDetail'
 import BrandPage from './pages/BrandPage'
@@ -24,7 +23,7 @@ import Checkout from './pages/Checkout'
 import Account from './pages/Account'
 import Shop from './pages/Shop'
 
-const SIDEBAR_PAGES  = ['/home', '/map', '/try-on', '/featured', '/look-picker', '/brand', '/checkout', '/account']
+const SIDEBAR_PAGES  = ['/map', '/try-on', '/featured', '/look-picker', '/brand', '/checkout', '/account']
 const STOREFRONT     = ['/', '/shop', '/product']   // no app chrome, white bg
 const NO_HEADERS     = ['/', '/login', '/onboarding', '/shop', '/product']
 
@@ -55,7 +54,6 @@ function AppRoutes() {
             <Route path="/shop/:category"   element={<Shop />} />
 
             {/* ── Protected routes — require JWT ── */}
-            <Route path="/home"       element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path="/map"        element={<ProtectedRoute><MapView /></ProtectedRoute>} />
             <Route path="/product/:id"      element={<ProductDetail />} />
             <Route path="/brand/:brandId"   element={<ProtectedRoute><BrandPage /></ProtectedRoute>} />

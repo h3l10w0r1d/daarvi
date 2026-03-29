@@ -8,16 +8,16 @@ import { useNavigate } from 'react-router-dom'
 const EASE = [0.76, 0, 0.24, 1]
 
 const globalNav = [
-  { to: '/home',         icon: Home,     label: 'Home' },
-  { to: '/home?cat=all', icon: Globe2,   label: 'Collections' },
+  { to: '/shop',         icon: Home,     label: 'Home' },
+  { to: '/shop', icon: Globe2,   label: 'Collections' },
   { to: '/featured',     icon: Star,     label: 'Featured' },
   { to: '/look-picker',  icon: Layers,   label: 'Look Picker' },
   { to: '/try-on',       icon: Sparkles, label: 'Try On' },
 ]
 
 const localNav = [
-  { to: '/home',         icon: Home,       label: 'Home' },
-  { to: '/home?cat=all', icon: Store,      label: 'Nearby Stores' },
+  { to: '/shop',         icon: Home,       label: 'Home' },
+  { to: '/shop', icon: Store,      label: 'Nearby Stores' },
   { to: '/featured',     icon: Star,       label: 'Featured' },
   { to: '/look-picker',  icon: Layers,     label: 'Look Picker' },
   { to: '/map',          icon: Navigation, label: 'City Map' },
@@ -54,7 +54,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="px-7 pt-8 pb-6 flex items-center justify-between">
         <Link
-          to="/home"
+          to="/shop"
           className="font-serif text-lg tracking-[0.3em] text-cream hover:text-gold transition-colors duration-300"
         >
           DAARVI

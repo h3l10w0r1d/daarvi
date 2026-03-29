@@ -396,6 +396,7 @@ function ProductCard({ product, index }) {
       style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: `1px solid ${C_BORDER}` }}
     >
       {/* Image */}
+      <Link to={`/product/${product.id}`} style={{ textDecoration: 'none' }}>
       <div className="relative overflow-hidden" style={{ aspectRatio: '3/4', background: '#f5f5f5' }}>
         <img
           src={product.image}
@@ -411,13 +412,14 @@ function ProductCard({ product, index }) {
         )}
         {/* Wishlist */}
         <button
-          onClick={() => setWishlisted(!wishlisted)}
+          onClick={(e) => { e.preventDefault(); setWishlisted(!wishlisted) }}
           className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all"
           style={{ background: wishlisted ? BLUE : 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)' }}
         >
           <Heart size={14} color={wishlisted ? '#fff' : C_DARK} fill={wishlisted ? '#fff' : 'none'} />
         </button>
       </div>
+      </Link>
 
       {/* Card body */}
       <div className="flex flex-col gap-2 p-4" style={{ flex: 1 }}>

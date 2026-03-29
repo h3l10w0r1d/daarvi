@@ -9,6 +9,7 @@ import {
 import { useApp } from '../context/AppContext'
 import { useProduct, useProducts } from '../hooks/useProducts'
 import { ProductDetailSkeleton } from '../components/Skeleton'
+import { products as mockProducts } from '../data/mockData'
 
 // ── Design tokens (exact Figma) ───────────────────────────────────────
 const G      = { fontFamily: 'Geist, sans-serif' }
@@ -68,9 +69,12 @@ export default function ProductDetail() {
   const navigate = useNavigate()
   const { mode, isWishlisted, toggleWishlist, addToCart, cartCount, user } = useApp()
 
-  const { data: product, isLoading } = useProduct(id)
-  const { data: allProducts = [] } = useProducts(product ? { category: product.category } : {})
-  const related = allProducts.filter(p => p.id !== id).slice(0, 4)
+  const { data: apiProduct, isLoading, isError } = useProduct(id)
+  // Fall back to mockData when API fails (unauthenticated users or dev mode)
+  const product = apiProduct ?? (isError || !isLoading ? mockProducts.find(p => String(p.id) === String(id)) ?? null : undefined)
+  const { data: allApiProducts = [] } = useProducts(product ? { category: product.category } : {})
+  const allProducts = allApiProducts.length ? allApiProducts : mockProducts
+  const related = allProducts.filter(p => String(p.id) !== String(id)).slice(0, 4)
 
   const [imageIndex, setImageIndex] = useState(0)
   const [selectedSize, setSelectedSize]   = useState(null)
@@ -82,7 +86,7 @@ export default function ProductDetail() {
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
 
-  if (isLoading) return <ProductDetailSkeleton />
+  if (isLoading && product === undefined) return <ProductDetailSkeleton />
 
   if (!product) {
     return (
