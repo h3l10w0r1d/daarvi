@@ -24,14 +24,15 @@ import Checkout from './pages/Checkout'
 import Account from './pages/Account'
 import Shop from './pages/Shop'
 
-const SIDEBAR_PAGES = ['/home', '/map', '/try-on', '/featured', '/look-picker', '/product', '/brand', '/checkout', '/account']
-const NO_HEADERS   = ['/', '/login', '/onboarding', '/shop']
+const SIDEBAR_PAGES  = ['/home', '/map', '/try-on', '/featured', '/look-picker', '/brand', '/checkout', '/account']
+const STOREFRONT     = ['/', '/shop', '/product']   // no app chrome, white bg
+const NO_HEADERS     = ['/', '/login', '/onboarding', '/shop', '/product']
 
 function AppRoutes() {
   const location = useLocation()
   const hasSidebar   = SIDEBAR_PAGES.some(p => location.pathname.startsWith(p))
   const hasHeaders   = !NO_HEADERS.some(p => location.pathname === p || location.pathname.startsWith(p + '/'))
-  const isStorefront = location.pathname === '/' || location.pathname.startsWith('/shop')
+  const isStorefront = STOREFRONT.some(p => location.pathname === p || location.pathname.startsWith(p + '/') || location.pathname.startsWith(p + ':'))
 
   return (
     <div className={`flex min-h-screen ${isStorefront ? 'bg-white' : 'bg-black'}`}>
@@ -56,7 +57,7 @@ function AppRoutes() {
             {/* ── Protected routes — require JWT ── */}
             <Route path="/home"       element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path="/map"        element={<ProtectedRoute><MapView /></ProtectedRoute>} />
-            <Route path="/product/:id"      element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
+            <Route path="/product/:id"      element={<ProductDetail />} />
             <Route path="/brand/:brandId"   element={<ProtectedRoute><BrandPage /></ProtectedRoute>} />
             <Route path="/featured"    element={<ProtectedRoute><Featured /></ProtectedRoute>} />
             <Route path="/look-picker" element={<ProtectedRoute><LookPicker /></ProtectedRoute>} />

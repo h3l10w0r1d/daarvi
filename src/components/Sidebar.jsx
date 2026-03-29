@@ -28,7 +28,7 @@ export default function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { mode, setMode, user, logout, cartCount, mobileSidebarOpen, setMobileSidebarOpen } = useApp()
-  const hide = ['/', '/login', '/onboarding'].includes(location.pathname) || location.pathname.startsWith('/shop')
+  const hide = ['/', '/login', '/onboarding'].includes(location.pathname) || location.pathname.startsWith('/shop') || location.pathname.startsWith('/product')
 
   // Track if mobile
   const [isMobile, setIsMobile] = useState(() =>

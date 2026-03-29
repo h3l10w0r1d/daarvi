@@ -34,7 +34,7 @@ export default function Login() {
         navigate('/onboarding')
       } else {
         await login(email, password)
-        navigate('/home')
+        navigate('/shop')
       }
     } catch (err) {
       setError(err.message)

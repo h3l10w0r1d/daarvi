@@ -88,7 +88,7 @@ const BRAND_LIST = Object.values(brands)
 
 export default function SuperHeader() {
   const location = useLocation()
-  const hide = ['/', '/login', '/onboarding'].includes(location.pathname) || location.pathname.startsWith('/shop')
+  const hide = ['/', '/login', '/onboarding'].includes(location.pathname) || location.pathname.startsWith('/shop') || location.pathname.startsWith('/product')
   if (hide) return null
 
   return (
