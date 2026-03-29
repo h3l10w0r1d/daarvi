@@ -8,7 +8,7 @@ const EASE = [0.76, 0, 0.24, 1]
 export default function Navbar() {
   const location = useLocation()
   const { cartCount, user, mobileSidebarOpen, setMobileSidebarOpen } = useApp()
-  const hide = ['/', '/login', '/onboarding'].includes(location.pathname)
+  const hide = ['/', '/login', '/onboarding'].includes(location.pathname) || location.pathname.startsWith('/shop')
 
   if (hide) return null
 

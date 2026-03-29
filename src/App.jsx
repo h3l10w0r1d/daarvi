@@ -31,9 +31,10 @@ function AppRoutes() {
   const location = useLocation()
   const hasSidebar   = SIDEBAR_PAGES.some(p => location.pathname.startsWith(p))
   const hasHeaders   = !NO_HEADERS.some(p => location.pathname === p || location.pathname.startsWith(p + '/'))
+  const isStorefront = location.pathname === '/' || location.pathname.startsWith('/shop')
 
   return (
-    <div className="flex min-h-screen bg-black">
+    <div className={`flex min-h-screen ${isStorefront ? 'bg-white' : 'bg-black'}`}>
       <Sidebar />
 
       <div
