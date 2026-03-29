@@ -19,11 +19,10 @@ import BrandPage from './pages/BrandPage'
 import Featured from './pages/Featured'
 import LookPicker from './pages/LookPicker'
 import TryOn from './pages/TryOn'
-import Checkout from './pages/Checkout'
 import Account from './pages/Account'
 import Shop from './pages/Shop'
 
-const SIDEBAR_PAGES  = ['/map', '/try-on', '/featured', '/look-picker', '/brand', '/checkout', '/account']
+const SIDEBAR_PAGES  = ['/map', '/try-on', '/featured', '/look-picker', '/brand', '/account']
 const STOREFRONT     = ['/', '/shop', '/product']   // no app chrome, white bg
 const NO_HEADERS     = ['/', '/login', '/onboarding', '/shop', '/product']
 
@@ -60,7 +59,6 @@ function AppRoutes() {
             <Route path="/featured"    element={<ProtectedRoute><Featured /></ProtectedRoute>} />
             <Route path="/look-picker" element={<ProtectedRoute><LookPicker /></ProtectedRoute>} />
             <Route path="/try-on"    element={<ProtectedRoute><TryOn /></ProtectedRoute>} />
-            <Route path="/checkout"  element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
             <Route path="/account"   element={<ProtectedRoute><Account /></ProtectedRoute>} />
           </Routes>
         </AnimatePresence>

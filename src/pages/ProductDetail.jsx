@@ -125,7 +125,7 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     addToCart?.(product, selectedSize, selectedColor, quantity)
-    navigate('/checkout')
+    navigate('/account')
   }
 
   const sizes  = product.sizes ?? ['XS','S','M','L','XL','XXL']
@@ -188,7 +188,7 @@ export default function ProductDetail() {
             <Link to={user ? '/account' : '/login'} className="flex w-9 h-9 items-center justify-center rounded-md hover:bg-gray-50">
               <User size={18} color={C_DARK} strokeWidth={1.5} />
             </Link>
-            <Link to={user ? '/checkout' : '/login'} className="relative flex w-9 h-9 items-center justify-center rounded-md hover:bg-gray-50">
+            <Link to={user ? '/account' : '/login'} className="relative flex w-9 h-9 items-center justify-center rounded-md hover:bg-gray-50">
               <ShoppingBag size={18} color={C_DARK} strokeWidth={1.5} />
               {cartCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
@@ -463,31 +463,200 @@ export default function ProductDetail() {
           </button>
         </div>
 
-        {/* ── Related products ── */}
-        {related.length > 0 && (
-          <div style={{ borderTop: `1px solid ${C_BORDER}`, paddingTop: 48, paddingBottom: 64 }}>
-            <h2 style={{ ...G, fontSize: 24, fontWeight: 600, color: C_DARK, marginBottom: 32, letterSpacing: '-0.5px' }}>
-              You might also like
-            </h2>
-            <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))' }}>
-              {related.map(p => (
-                <Link key={p.id} to={`/product/${p.id}`} style={{ textDecoration: 'none' }}
-                  className="group flex flex-col rounded-lg overflow-hidden border transition-shadow hover:shadow-md"
-                  style={{ border: `1px solid ${C_BORDER}`, borderRadius: 8, textDecoration: 'none' }}>
-                  <div className="overflow-hidden" style={{ aspectRatio: '3/4', background: C_BG }}>
-                    <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  </div>
-                  <div className="p-4 flex flex-col gap-1">
-                    <span style={{ ...G, fontSize: 12, color: C_MID }}>{p.category}</span>
-                    <span style={{ ...G, fontSize: 14, fontWeight: 500, color: C_DARK }}>{p.name}</span>
-                    <span style={{ ...G, fontSize: 16, fontWeight: 500, color: C_DARK }}>${p.priceLocal ?? p.priceGlobal}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* ── You May Also Like ── */}
+        <ProductListSection title="You May Also Like" products={related.slice(0, 4)} />
+
+        {/* ── Best Sellers ── */}
+        <ProductListSection title="Best Sellers" products={[...mockProducts].reverse().slice(0, 4)} />
+      </div>
+
+      {/* ── CTA Section ── */}
+      <CTASection />
+
+      {/* ── Incentives ── */}
+      <IncentivesSection />
+
+      {/* ── Footer ── */}
+      <SiteFooter />
+    </div>
+  )
+}
+
+// ── Product list section (You May Also Like / Best Sellers) ──────────
+function ProductListSection({ title, products: list }) {
+  if (!list.length) return null
+  return (
+    <div style={{ borderTop: `1px solid ${C_BORDER}`, paddingTop: 64, paddingBottom: 64 }}>
+      <div className="flex items-center justify-between mb-10">
+        <h2 style={{ ...G, fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 600, color: C_DARK, letterSpacing: '-1px', margin: 0 }}>
+          {title}
+        </h2>
+        <Link to="/shop" style={{ ...G, fontSize: 14, fontWeight: 500, color: C_DARK, textDecoration: 'none', padding: '8px 16px', border: `1px solid ${C_BORDER}`, borderRadius: 8 }}
+          className="hover:bg-gray-50 transition-colors">
+          View all
+        </Link>
+      </div>
+      <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
+        {list.map((p, i) => (
+          <MiniProductCard key={p.id} product={p} index={i} />
+        ))}
       </div>
     </div>
+  )
+}
+
+function MiniProductCard({ product: p, index }) {
+  const [addedToCart, setAddedToCart] = useState(false)
+  const { addToCart } = useApp()
+  const isSale = p.priceGlobal && p.priceLocal && p.priceGlobal > p.priceLocal
+
+  const handleAdd = (e) => {
+    e.preventDefault()
+    addToCart?.(p)
+    setAddedToCart(true)
+    setTimeout(() => setAddedToCart(false), 1200)
+  }
+
+  return (
+    <Link to={`/product/${p.id}`} style={{ textDecoration: 'none' }} className="group flex flex-col"
+      style={{ border: `1px solid ${C_BORDER}`, borderRadius: 8, overflow: 'hidden', textDecoration: 'none' }}>
+      <div className="relative overflow-hidden" style={{ aspectRatio: '3/4', background: C_BG }}>
+        <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        {isSale && (
+          <div className="absolute top-3 left-3 px-2 py-0.5 rounded-full"
+            style={{ background: BLUE, color: '#fff', fontSize: 12, fontWeight: 500 }}>Sale</div>
+        )}
+      </div>
+      <div className="p-4 flex flex-col gap-2">
+        <span style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID }}>{p.category ?? 'Clothing'}</span>
+        <span style={{ ...G, fontSize: 14, fontWeight: 500, color: C_DARK, lineHeight: 1.4 }}>{p.name}</span>
+        <p style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID, lineHeight: 1.5, margin: 0 }} className="line-clamp-2">
+          {p.description ?? 'Premium quality crafted for everyday style.'}
+        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <span style={{ ...G, fontSize: 18, fontWeight: 500, color: C_DARK }}>${p.priceLocal ?? p.priceGlobal}</span>
+          {isSale && <span style={{ ...G, fontSize: 18, fontWeight: 400, color: C_MID, textDecoration: 'line-through' }}>${p.priceGlobal}</span>}
+        </div>
+        <button onClick={handleAdd}
+          className="w-full flex items-center justify-center gap-2 mt-1 rounded-lg transition-all"
+          style={{
+            ...G, height: 36, fontSize: 14, fontWeight: 500,
+            background: addedToCart ? '#16a34a' : C_DARK, color: '#fff',
+            border: 'none', cursor: 'pointer', borderRadius: 6,
+          }}>
+          <ShoppingBag size={14} />
+          {addedToCart ? 'Added!' : 'Add to cart'}
+        </button>
+      </div>
+    </Link>
+  )
+}
+
+// ── CTA Section ───────────────────────────────────────────────────────
+function CTASection() {
+  const [email, setEmail] = useState('')
+  return (
+    <div style={{ background: BLUE, padding: '80px 0' }}>
+      <div className="max-w-[1280px] mx-auto px-8 flex flex-col items-center text-center gap-6">
+        <span style={{ ...G, fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.8)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          Limited Time Offer
+        </span>
+        <h2 style={{ ...G, fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 600, color: '#fff', letterSpacing: '-1px', margin: 0, lineHeight: 1.15 }}>
+          Join Our Awesome Community Today
+        </h2>
+        <p style={{ ...G, fontSize: 18, fontWeight: 400, color: 'rgba(255,255,255,0.8)', maxWidth: 560, lineHeight: 1.6, margin: 0 }}>
+          Sign up for our newsletter and get 15% off your first order. Be the first to know about new arrivals and exclusive deals.
+        </p>
+        <div className="flex gap-3 w-full" style={{ maxWidth: 440 }}>
+          <input
+            type="email" placeholder="Enter your email"
+            value={email} onChange={e => setEmail(e.target.value)}
+            style={{ ...G, flex: 1, height: 44, padding: '0 16px', borderRadius: 8, border: 'none', fontSize: 14, outline: 'none', background: 'rgba(255,255,255,0.15)', color: '#fff' }}
+          />
+          <button style={{ ...G, height: 44, padding: '0 24px', borderRadius: 8, background: '#fff', color: BLUE, fontSize: 14, fontWeight: 500, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}
+            className="hover:bg-gray-100 transition-colors">
+            Sign Up Now
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Incentives Section ────────────────────────────────────────────────
+function IncentivesSection() {
+  const items = [
+    { icon: Truck,      title: 'Free 2-day shipping',  desc: 'Complimentary express shipping on every order over $75, anywhere in the continental US.' },
+    { icon: RotateCcw,  title: '30-day free returns',  desc: 'Send items back within 30 days for a fast refund with no restocking fees.' },
+    { icon: Shield,     title: 'Secure checkout',       desc: '256-bit SSL encryption on every purchase keeps your payment info safe.' },
+  ]
+  return (
+    <div style={{ background: '#e8e8e8', padding: '48px 0' }}>
+      <div className="max-w-[1280px] mx-auto px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {items.map(({ icon: Icon, title, desc }) => (
+            <div key={title} className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: '#fff' }}>
+                <Icon size={18} color={C_DARK} strokeWidth={1.5} />
+              </div>
+              <div>
+                <p style={{ ...G, fontSize: 16, fontWeight: 500, color: C_DARK, margin: '0 0 4px' }}>{title}</p>
+                <p style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID, lineHeight: 1.6, margin: 0 }}>{desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Site Footer ───────────────────────────────────────────────────────
+function SiteFooter() {
+  const cols = [
+    { heading: 'Shop', links: ["Women's Collection", "Men's Collection", 'Accessories', 'New Arrivals'] },
+    { heading: 'Customer Service', links: ['Shipping & Returns', 'Size Guide', 'FAQ', 'Contact Us'] },
+    { heading: 'About', links: ['Our Story', 'Careers', 'Sustainability', 'Press'] },
+    { heading: 'Connect', links: ['Newsletter', 'Instagram', 'Facebook', 'Twitter'] },
+  ]
+  return (
+    <footer style={{ background: '#fff', borderTop: `1px solid ${C_BORDER}` }}>
+      <div className="max-w-[1280px] mx-auto px-8 pt-16 pb-8">
+        {/* Top: logo + columns */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-12">
+          {/* Brand col */}
+          <div className="col-span-2 md:col-span-1">
+            <Link to="/shop" style={{ ...G, fontSize: 20, fontWeight: 700, letterSpacing: '0.1em', color: C_DARK, textDecoration: 'none' }}>
+              DAARVI
+            </Link>
+            <p style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID, marginTop: 12, lineHeight: 1.6 }}>
+              Premium fashion for those who appreciate quality and style.
+            </p>
+          </div>
+          {/* Link columns */}
+          {cols.map(col => (
+            <div key={col.heading} className="flex flex-col gap-3">
+              <span style={{ ...G, fontSize: 16, fontWeight: 500, color: C_DARK }}>{col.heading}</span>
+              {col.links.map(l => (
+                <Link key={l} to="/shop" style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID, textDecoration: 'none' }}
+                  className="hover:text-blue-600 transition-colors">{l}</Link>
+              ))}
+            </div>
+          ))}
+        </div>
+        {/* Bottom bar */}
+        <div style={{ borderTop: `1px solid ${C_BORDER}`, paddingTop: 24 }} className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <span style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID }}>
+            Copyright © 2025 Daarvi. All rights reserved.
+          </span>
+          <div className="flex items-center gap-6">
+            {['Privacy Policy', 'Terms of Service', 'Cookies Settings'].map(l => (
+              <Link key={l} to="/shop" style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID, textDecoration: 'none' }}
+                className="hover:text-blue-600 transition-colors">{l}</Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
   )
 }

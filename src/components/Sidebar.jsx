@@ -126,7 +126,7 @@ export default function Sidebar() {
       <div className="px-4 py-5 flex flex-col gap-1">
         {/* Cart / Checkout link */}
         <Link
-          to="/checkout"
+          to="/account"
           className="group flex items-center justify-between px-3 py-2.5 relative transition-colors duration-200"
         >
           <div className="flex items-center gap-3">

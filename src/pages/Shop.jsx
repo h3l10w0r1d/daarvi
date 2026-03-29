@@ -127,10 +127,10 @@ export default function Shop() {
             <button className="hidden md:flex w-9 h-9 items-center justify-center rounded-md hover:bg-gray-50 transition-colors">
               <Search size={18} color={C_DARK} strokeWidth={1.5} />
             </button>
-            <Link to={user ? '/home' : '/login'} className="flex w-9 h-9 items-center justify-center rounded-md hover:bg-gray-50 transition-colors">
+            <Link to={user ? '/account' : '/login'} className="flex w-9 h-9 items-center justify-center rounded-md hover:bg-gray-50 transition-colors">
               <User size={18} color={C_DARK} strokeWidth={1.5} />
             </Link>
-            <Link to={user ? '/checkout' : '/login'} className="relative flex w-9 h-9 items-center justify-center rounded-md hover:bg-gray-50 transition-colors">
+            <Link to={user ? '/account' : '/login'} className="relative flex w-9 h-9 items-center justify-center rounded-md hover:bg-gray-50 transition-colors">
               <ShoppingBag size={18} color={C_DARK} strokeWidth={1.5} />
               {cartCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"

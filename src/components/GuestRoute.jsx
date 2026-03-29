@@ -9,7 +9,7 @@ export default function GuestRoute({ children }) {
   const { user } = useApp()
 
   if (user) {
-    return <Navigate to="/home" replace />
+    return <Navigate to="/shop" replace />
   }
 
   return children
