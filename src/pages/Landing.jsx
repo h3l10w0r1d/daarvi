@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion, useInView } from 'framer-motion'
 import {
   ArrowRight, User, ShoppingBag, Truck, RotateCcw,
@@ -7,7 +7,6 @@ import {
   ChevronDown,
 } from 'lucide-react'
 import { brands, products } from '../data/mockData'
-import LoginModal from '../components/LoginModal'
 import { useApp } from '../context/AppContext'
 
 const EASE = [0.76, 0, 0.24, 1]
@@ -25,30 +24,19 @@ const C_LIGHT    = '#f5f5f5'   // rgb(245,245,245) — text on dark bg
 const G = { fontFamily: 'Geist, sans-serif' }
 
 export default function Landing() {
-  const [modalOpen, setModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState('login')
+  const navigate = useNavigate()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-
-  const openModal = (mode = 'login') => {
-    setModalMode(mode)
-    setModalOpen(true)
-  }
 
   return (
     <div style={{ ...G, background: '#ffffff', minHeight: '100vh', maxWidth: '100vw', overflowX: 'clip' }}>
-      <LoginModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        defaultMode={modalMode}
-      />
       <AnnouncementBanner />
       <StoreNavbar mobileNavOpen={mobileNavOpen} setMobileNavOpen={setMobileNavOpen} />
-      <HeroSection openModal={openModal} />
-      <FeaturedProducts openModal={openModal} />
-      <ShopByCategory openModal={openModal} />
-      <FlashSale openModal={openModal} />
-      <BestSellers openModal={openModal} />
-      <CTASection openModal={openModal} />
+      <HeroSection navigate={navigate} />
+      <FeaturedProducts navigate={navigate} />
+      <ShopByCategory navigate={navigate} />
+      <FlashSale navigate={navigate} />
+      <BestSellers navigate={navigate} />
+      <CTASection navigate={navigate} />
       <TrustBadges />
       <SiteFooter />
     </div>
@@ -90,11 +78,11 @@ function AnnouncementBanner() {
 // ② STORE NAVBAR  (Figma: white bar h=64 + megamenu)
 // ════════════════════════════════════════════════════════════════════
 const NAV_LINKS = [
-  { label: 'Women',         mega: true  },
-  { label: 'Men',           mega: false },
-  { label: 'Kids',          mega: false },
-  { label: 'Accessories',   mega: false },
-  { label: 'Store Locator', mega: false },
+  { label: 'Women',         mega: true,  to: '/shop/women'   },
+  { label: 'Men',           mega: false, to: '/shop/men'     },
+  { label: 'Kids',          mega: false, to: '/shop/kids'    },
+  { label: 'About Us',      mega: false, to: '/#about'       },
+  { label: 'Store Locator', mega: false, to: '/#stores'      },
 ]
 
 const MEGA_MENU = {
@@ -112,8 +100,8 @@ const MEGA_MENU = {
   },
 }
 
-function StoreNavbar({ openModal, mobileNavOpen, setMobileNavOpen }) {
-  const { cartCount } = useApp()
+function StoreNavbar({ mobileNavOpen, setMobileNavOpen }) {
+  const { cartCount, user } = useApp()
   const [megaOpen, setMegaOpen] = useState(false)
   const closeTimer = useRef(null)
 
@@ -134,10 +122,10 @@ function StoreNavbar({ openModal, mobileNavOpen, setMobileNavOpen }) {
 
         {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
-          {NAV_LINKS.map(({ label, mega }) => (
+          {NAV_LINKS.map(({ label, mega, to }) => (
             <Link
               key={label}
-              to={`/shop/${label.toLowerCase()}`}
+              to={to}
               onMouseEnter={mega ? openMega : closeMega}
               style={{ ...G, fontSize: 14, fontWeight: 500, lineHeight: '20px', color: C_DARK, padding: '8px 16px', textDecoration: 'none' }}
               className="flex items-center gap-1 rounded-md hover:bg-gray-50 transition-colors"
@@ -156,13 +144,13 @@ function StoreNavbar({ openModal, mobileNavOpen, setMobileNavOpen }) {
             <Search size={18} color={C_DARK} strokeWidth={1.5} />
           </button>
           <Link
-            to="/login"
+            to={user ? '/home' : '/login'}
             className="flex items-center justify-center w-9 h-9 rounded-md hover:bg-gray-50 transition-colors"
           >
             <User size={18} color={C_DARK} strokeWidth={1.5} />
           </Link>
           <Link
-            to="/login"
+            to={user ? '/checkout' : '/login'}
             className="relative flex items-center justify-center w-9 h-9 rounded-md hover:bg-gray-50 transition-colors"
           >
             <ShoppingBag size={18} color={C_DARK} strokeWidth={1.5} />
@@ -195,9 +183,15 @@ function StoreNavbar({ openModal, mobileNavOpen, setMobileNavOpen }) {
             </button>
           ))}
           <div className="pt-4 flex gap-3">
-            <Link to="/login" style={{ ...G, fontSize: 14, fontWeight: 500, color: '#fff', background: BLUE, padding: '8px 20px', borderRadius: 6, textDecoration: 'none' }}>
-              Login
-            </Link>
+            {user ? (
+              <Link to="/home" style={{ ...G, fontSize: 14, fontWeight: 500, color: '#fff', background: BLUE, padding: '8px 20px', borderRadius: 6, textDecoration: 'none' }}>
+                My Account
+              </Link>
+            ) : (
+              <Link to="/login" style={{ ...G, fontSize: 14, fontWeight: 500, color: '#fff', background: BLUE, padding: '8px 20px', borderRadius: 6, textDecoration: 'none' }}>
+                Login
+              </Link>
+            )}
           </div>
         </div>
       )}
@@ -263,7 +257,7 @@ function StoreNavbar({ openModal, mobileNavOpen, setMobileNavOpen }) {
 // ════════════════════════════════════════════════════════════════════
 // ③ HERO
 // ════════════════════════════════════════════════════════════════════
-function HeroSection({ openModal }) {
+function HeroSection({ navigate }) {
   const heroBg = BRAND_VALUES[0]?.cover
 
   return (
@@ -321,7 +315,7 @@ function HeroSection({ openModal }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: EASE, delay: 0.5 }}
-            onClick={() => openModal('signup')}
+            onClick={() => navigate("/shop")}
             className="transition-colors"
             style={{ ...G, background: BLUE, color: '#fff', fontSize: 14, fontWeight: 500, lineHeight: '20px', padding: '10px 24px', borderRadius: 8, border: 'none', cursor: 'pointer' }}
             onMouseEnter={e => e.currentTarget.style.background = BLUE_HOVER}
@@ -338,15 +332,15 @@ function HeroSection({ openModal }) {
 // ════════════════════════════════════════════════════════════════════
 // ④ FEATURED PRODUCTS
 // ════════════════════════════════════════════════════════════════════
-function FeaturedProducts({ openModal }) {
+function FeaturedProducts({ navigate }) {
   const featured = products.slice(0, 3)
   return (
     <section style={{ background: '#ffffff', padding: '96px 24px' }}>
       <div className="max-w-[1280px] mx-auto">
-        <SectionHeader title="Featured products" onViewAll={() => openModal('login')} />
+        <SectionHeader title="Featured products" onViewAll={() => navigate("/shop")} />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {featured.map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i} openModal={openModal} showSale={i > 0} />
+            <ProductCard key={product.id} product={product} index={i} navigate={navigate} showSale={i > 0} />
           ))}
         </div>
       </div>
@@ -363,11 +357,11 @@ const CATEGORIES = [
   { label: 'Trending Now', title: 'Accessories', idx: 2 },
 ]
 
-function ShopByCategory({ openModal }) {
+function ShopByCategory({ navigate }) {
   return (
     <section style={{ background: GRAY_BG, padding: '96px 24px' }}>
       <div className="max-w-[1280px] mx-auto">
-        <SectionHeader title="Shop by Category" onViewAll={() => openModal('login')} />
+        <SectionHeader title="Shop by Category" onViewAll={() => navigate("/shop")} />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {CATEGORIES.map((cat, i) => {
             const bg = BRAND_VALUES[cat.idx]?.cover
@@ -380,7 +374,7 @@ function ShopByCategory({ openModal }) {
                 transition={{ duration: 0.5, ease: EASE, delay: i * 0.1 }}
                 className="relative overflow-hidden group rounded-lg text-left focus:outline-none"
                 style={{ aspectRatio: '3/4' }}
-                onClick={() => openModal('login')}
+                onClick={() => navigate("/shop")}
               >
                 {bg && (
                   <img src={bg} alt={cat.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -412,7 +406,7 @@ function ShopByCategory({ openModal }) {
 // ════════════════════════════════════════════════════════════════════
 // ⑥ FLASH SALE
 // ════════════════════════════════════════════════════════════════════
-function FlashSale({ openModal }) {
+function FlashSale({ navigate }) {
   const saleBg = BRAND_VALUES[3]?.cover
   const endDate = useRef(new Date(Date.now() + 12 * 86400000 + 23 * 3600000 + 46 * 60000 + 17000))
   const [time, setTime] = useState({ days: 12, hours: 23, min: 46, sec: 17 })
@@ -490,7 +484,7 @@ function FlashSale({ openModal }) {
           </div>
 
           <button
-            onClick={() => openModal('login')}
+            onClick={() => navigate("/shop")}
             style={{ ...G, background: BLUE, color: '#fff', fontSize: 14, fontWeight: 500, lineHeight: '20px', padding: '10px 24px', borderRadius: 8, border: 'none', cursor: 'pointer' }}
             onMouseEnter={e => e.currentTarget.style.background = BLUE_HOVER}
             onMouseLeave={e => e.currentTarget.style.background = BLUE}
@@ -506,19 +500,19 @@ function FlashSale({ openModal }) {
 // ════════════════════════════════════════════════════════════════════
 // ⑦ BEST SELLERS
 // ════════════════════════════════════════════════════════════════════
-function BestSellers({ openModal }) {
+function BestSellers({ navigate }) {
   const items = products.length >= 7 ? products.slice(3, 7) : products.slice(0, 4)
   return (
     <section style={{ background: '#ffffff', padding: '96px 24px' }}>
       <div className="max-w-[1280px] mx-auto">
-        <SectionHeader title="Best Sellers" onViewAll={() => openModal('login')} />
+        <SectionHeader title="Best Sellers" onViewAll={() => navigate("/shop")} />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
           {items.map((product, i) => (
             <ProductCard
               key={product.id + '-bs'}
               product={product}
               index={i}
-              openModal={openModal}
+              navigate={navigate}
               showSale={i % 2 === 0}
             />
           ))}
@@ -531,7 +525,7 @@ function BestSellers({ openModal }) {
 // ════════════════════════════════════════════════════════════════════
 // ⑧ CTA SECTION
 // ════════════════════════════════════════════════════════════════════
-function CTASection({ openModal }) {
+function CTASection({ navigate }) {
   const ref    = useRef()
   const inView = useInView(ref, { once: true, margin: '-80px' })
 
@@ -567,7 +561,7 @@ function CTASection({ openModal }) {
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, ease: EASE, delay: 0.5 }}
-            onClick={() => openModal('signup')}
+            onClick={() => navigate("/shop")}
             style={{ ...G, background: '#ffffff', color: C_DARK, fontSize: 14, fontWeight: 500, lineHeight: '20px', padding: '10px 32px', borderRadius: 8, border: 'none', cursor: 'pointer' }}
             className="hover:bg-gray-100 transition-colors"
           >
@@ -680,7 +674,7 @@ function FooterCol({ title, links }) {
 // ════════════════════════════════════════════════════════════════════
 // SHARED: PRODUCT CARD
 // ════════════════════════════════════════════════════════════════════
-function ProductCard({ product, index, openModal, showSale = false }) {
+function ProductCard({ product, index, navigate, showSale = false }) {
   const price    = Math.min(product.priceLocal || 0, product.priceGlobal || 0)
   const original = Math.max(product.priceLocal || 0, product.priceGlobal || 0)
 
@@ -691,7 +685,7 @@ function ProductCard({ product, index, openModal, showSale = false }) {
       viewport={{ once: true }}
       transition={{ duration: 0.5, ease: EASE, delay: index * 0.08 }}
       className="group cursor-pointer"
-      onClick={() => openModal('login')}
+      onClick={() => navigate("/shop")}
     >
       {/* Image */}
       <div className="relative overflow-hidden rounded-lg" style={{ aspectRatio: '3/4', background: '#f5f5f5' }}>

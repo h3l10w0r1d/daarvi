@@ -46,7 +46,7 @@ function AppRoutes() {
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             {/* ── Public routes — redirect to /home if already logged in ── */}
-            <Route path="/"           element={<GuestRoute><Landing /></GuestRoute>} />
+            <Route path="/"           element={<Landing />} />
             <Route path="/login"      element={<GuestRoute><Login /></GuestRoute>} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/shop"             element={<Shop />} />
