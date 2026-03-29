@@ -135,15 +135,16 @@ function StoreNavbar({ openModal, mobileNavOpen, setMobileNavOpen }) {
         {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
           {NAV_LINKS.map(({ label, mega }) => (
-            <button
+            <Link
               key={label}
+              to={`/shop/${label.toLowerCase()}`}
               onMouseEnter={mega ? openMega : closeMega}
-              style={{ ...G, fontSize: 14, fontWeight: 500, lineHeight: '20px', color: C_DARK, padding: '8px 16px' }}
+              style={{ ...G, fontSize: 14, fontWeight: 500, lineHeight: '20px', color: C_DARK, padding: '8px 16px', textDecoration: 'none' }}
               className="flex items-center gap-1 rounded-md hover:bg-gray-50 transition-colors"
             >
               {label}
               {mega && <ChevronDown size={14} color={C_DARK} style={{ opacity: 0.5, transition: 'transform 0.2s', transform: megaOpen ? 'rotate(180deg)' : 'rotate(0)' }} />}
-            </button>
+            </Link>
           ))}
         </nav>
 

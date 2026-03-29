@@ -22,14 +22,15 @@ import LookPicker from './pages/LookPicker'
 import TryOn from './pages/TryOn'
 import Checkout from './pages/Checkout'
 import Account from './pages/Account'
+import Shop from './pages/Shop'
 
 const SIDEBAR_PAGES = ['/home', '/map', '/try-on', '/featured', '/look-picker', '/product', '/brand', '/checkout', '/account']
-const NO_HEADERS   = ['/', '/login', '/onboarding']
+const NO_HEADERS   = ['/', '/login', '/onboarding', '/shop']
 
 function AppRoutes() {
   const location = useLocation()
   const hasSidebar   = SIDEBAR_PAGES.some(p => location.pathname.startsWith(p))
-  const hasHeaders   = !NO_HEADERS.includes(location.pathname)
+  const hasHeaders   = !NO_HEADERS.some(p => location.pathname === p || location.pathname.startsWith(p + '/'))
 
   return (
     <div className="flex min-h-screen bg-black">
@@ -48,6 +49,8 @@ function AppRoutes() {
             <Route path="/"           element={<GuestRoute><Landing /></GuestRoute>} />
             <Route path="/login"      element={<GuestRoute><Login /></GuestRoute>} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/shop"             element={<Shop />} />
+            <Route path="/shop/:category"   element={<Shop />} />
 
             {/* ── Protected routes — require JWT ── */}
             <Route path="/home"       element={<ProtectedRoute><Home /></ProtectedRoute>} />
