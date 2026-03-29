@@ -1,25 +1,32 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { Github, Eye, EyeOff, GalleryVerticalEnd } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 
-const EASE = [0.76, 0, 0.24, 1]
+const G = { fontFamily: 'Geist, sans-serif' }
+const BLUE = '#2563eb'
+const C_DARK = '#0a0a0a'
+const C_MID  = '#737373'
 
 export default function Login() {
-  const [mode, setMode] = useState('login') // 'login' | 'signup'
-  const [showPass, setShowPass] = useState(false)
-  const [email, setEmail] = useState('')
-  const [name, setName] = useState('')
-  const [password, setPassword] = useState('')
+  const [mode, setMode]           = useState('login') // 'login' | 'signup'
+  const [showPass, setShowPass]   = useState(false)
+  const [email, setEmail]         = useState('')
+  const [name, setName]           = useState('')
+  const [password, setPassword]   = useState('')
+  const [confirmPass, setConfirmPass] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError]         = useState(null)
   const navigate = useNavigate()
   const { login, register } = useApp()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
+    if (mode === 'signup' && password !== confirmPass) {
+      setError('Passwords do not match.')
+      return
+    }
     setSubmitting(true)
     try {
       if (mode === 'signup') {
@@ -37,197 +44,254 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex">
-      {/* Left panel */}
-      <motion.div
-        className="hidden md:flex flex-col justify-between w-1/2 bg-black p-16 relative overflow-hidden border-r border-white/10"
-        initial={{ clipPath: 'inset(0 0 100% 0)' }}
-        animate={{ clipPath: 'inset(0 0 0% 0)' }}
-        transition={{ duration: 0.9, ease: EASE }}
+    <div style={{ ...G, display: 'flex', minHeight: '100vh', background: '#fff' }}>
+      {/* ── Left: form panel ── */}
+      <div
+        className="flex flex-col w-full md:w-1/2"
+        style={{ background: '#ffffff', padding: '40px 80px', justifyContent: 'space-between', minHeight: '100vh' }}
       >
-        {/* Animated geometric background */}
-        <motion.div
-          className="absolute inset-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-        >
-          <div
-            className="absolute top-0 right-0 w-64 h-64 border border-gold/20"
-            style={{ transform: 'translate(30%, -30%) rotate(45deg)' }}
-          />
-          <div
-            className="absolute bottom-0 left-0 w-96 h-96 border border-gold/10"
-            style={{ transform: 'translate(-30%, 30%) rotate(45deg)' }}
-          />
-          <motion.div
-            className="absolute top-1/2 left-1/2 w-px h-40 bg-gold/30"
-            style={{ transform: 'translate(-50%, -50%)' }}
-            animate={{ scaleY: [1, 1.5, 1], opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        </motion.div>
-
-        {/* Brand */}
-        <div className="relative z-10">
-          <Link to="/" className="font-serif text-2xl tracking-widest text-cream">
-            DAARVI
-          </Link>
-        </div>
-
-        {/* Featured image */}
-        <motion.div
-          className="relative z-10 aspect-[3/4] w-48 mx-auto overflow-hidden"
-          initial={{ clipPath: 'inset(100% 0 0 0)' }}
-          animate={{ clipPath: 'inset(0% 0 0 0)' }}
-          transition={{ duration: 0.9, ease: EASE, delay: 0.4 }}
-        >
-          <img
-            src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&q=80"
-            alt="Fashion"
-            className="w-full h-full object-cover"
-          />
-        </motion.div>
-
-        {/* Quote */}
-        <div className="relative z-10">
-          <p className="font-serif text-lg text-cream/80 italic leading-relaxed">
-            "Style is a way to say who you are without having to speak."
-          </p>
-          <p className="mt-2 text-[10px] tracking-widest text-gold font-sans">— RACHEL ZOE</p>
-        </div>
-      </motion.div>
-
-      {/* Right panel — form */}
-      <motion.div
-        className="flex-1 flex flex-col justify-center px-8 md:px-16 py-12"
-        initial={{ opacity: 0, x: 40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.7, ease: EASE, delay: 0.3 }}
-      >
-        <div className="max-w-sm w-full mx-auto">
-          {/* Mobile logo */}
-          <Link to="/" className="md:hidden font-serif text-xl tracking-widest text-cream block mb-12">
-            DAARVI
-          </Link>
-
-          {/* Mode toggle */}
-          <div className="flex gap-0 mb-10 border border-white/10">
-            {['login', 'signup'].map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`flex-1 py-2.5 text-[10px] tracking-widest font-sans transition-all duration-300 ${
-                  mode === m ? 'bg-gold text-black' : 'text-gray hover:text-cream'
-                }`}
-              >
-                {m === 'login' ? 'SIGN IN' : 'CREATE ACCOUNT'}
-              </button>
-            ))}
+        {/* Logo */}
+        <div className="flex items-center gap-2">
+          <div style={{ width: 24, height: 24, background: C_DARK, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <GalleryVerticalEnd size={14} color="#fff" />
           </div>
+          <span style={{ fontSize: 14, fontWeight: 600, color: C_DARK }}>DAARVI</span>
+        </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={mode}
-              initial={{ clipPath: 'inset(0 100% 0 0)', opacity: 0 }}
-              animate={{ clipPath: 'inset(0 0% 0 0)', opacity: 1 }}
-              exit={{ clipPath: 'inset(0 0 0 100%)', opacity: 0 }}
-              transition={{ duration: 0.4, ease: EASE }}
-            >
-              <h1 className="font-serif text-3xl text-cream mb-2">
-                {mode === 'login' ? 'Welcome back' : 'Join Daarvi'}
+        {/* Form */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 48, paddingBottom: 48 }}>
+          <div style={{ width: '100%', maxWidth: 374 }}>
+            {/* Heading */}
+            <div style={{ marginBottom: 24 }}>
+              <h1 style={{ fontSize: 24, fontWeight: mode === 'signup' ? 700 : 600, color: C_DARK, margin: '0 0 8px' }}>
+                {mode === 'login' ? 'Login to your account' : 'Create your account'}
               </h1>
-              <p className="text-sm text-gray font-body mb-10">
+              <p style={{ fontSize: 14, fontWeight: 400, color: C_MID, margin: 0 }}>
                 {mode === 'login'
-                  ? 'Sign in to your curated wardrobe'
-                  : 'Create your account and take the DNA test'}
+                  ? 'Enter your email below to login to your account.'
+                  : 'Fill in the form below to create your account'}
               </p>
-            </motion.div>
-          </AnimatePresence>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <FormField label="EMAIL" type="email" value={email} onChange={setEmail} required />
-            {mode === 'signup' && (
-              <FormField label="NAME" type="text" value={name} onChange={setName} />
-            )}
-            <div className="relative">
-              <FormField
-                label="PASSWORD"
-                type={showPass ? 'text' : 'password'}
-                value={password}
-                onChange={setPassword}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPass(!showPass)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 mt-2.5 text-gray hover:text-cream transition-colors"
-              >
-                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
             </div>
 
-            {mode === 'login' && (
-              <div className="text-right">
-                <button type="button" className="text-[10px] tracking-widest text-gray hover:text-gold transition-colors font-sans">
-                  FORGOT PASSWORD?
-                </button>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Full name — signup only */}
+              {mode === 'signup' && (
+                <Field
+                  label="Full name"
+                  type="text"
+                  value={name}
+                  onChange={setName}
+                  placeholder="John Doe"
+                />
+              )}
+
+              {/* Email */}
+              <Field
+                label="Email"
+                type="email"
+                value={email}
+                onChange={setEmail}
+                placeholder="m@example.com"
+                description={mode === 'signup' ? "We'll use this to contact you. We will not share your email with anyone else." : undefined}
+                required
+              />
+
+              {/* Password */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <label style={{ fontSize: 14, fontWeight: 500, color: C_DARK }}>Password</label>
+                  {mode === 'login' && (
+                    <button type="button" style={{ fontSize: 14, fontWeight: 400, color: C_DARK, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                      Forgot your password?
+                    </button>
+                  )}
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPass ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    style={{
+                      width: '100%', height: 36, padding: '0 36px 0 12px',
+                      border: '1px solid #e5e7eb', borderRadius: 6,
+                      fontSize: 14, fontWeight: 400, color: C_DARK,
+                      background: '#fff', outline: 'none', boxSizing: 'border-box',
+                      fontFamily: 'Geist, sans-serif',
+                    }}
+                    onFocus={e => e.target.style.borderColor = BLUE}
+                    onBlur={e => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass(!showPass)}
+                    style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C_MID, display: 'flex', alignItems: 'center' }}
+                  >
+                    {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+                {mode === 'signup' && (
+                  <p style={{ fontSize: 14, fontWeight: 400, color: C_MID, marginTop: 6, marginBottom: 0 }}>
+                    Must be at least 8 characters long.
+                  </p>
+                )}
               </div>
-            )}
 
-            {error && (
-              <p className="text-[10px] tracking-widest text-red font-sans py-1">{error}</p>
-            )}
+              {/* Confirm Password — signup only */}
+              {mode === 'signup' && (
+                <Field
+                  label="Confirm Password"
+                  type="password"
+                  value={confirmPass}
+                  onChange={setConfirmPass}
+                  placeholder=""
+                  description="Please confirm your password."
+                  required
+                />
+              )}
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full mt-6 flex items-center justify-center gap-3 bg-cream text-black py-4 text-xs tracking-widest font-sans hover:bg-gold transition-colors duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {submitting ? 'PLEASE WAIT...' : mode === 'login' ? 'SIGN IN' : 'CREATE ACCOUNT & CONTINUE'}
-              {!submitting && <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" />}
-            </button>
-          </form>
+              {error && (
+                <p style={{ fontSize: 14, color: '#dc2626', margin: 0 }}>{error}</p>
+              )}
 
-          <div className="mt-6 flex items-center gap-4">
-            <div className="flex-1 h-px bg-white/10" />
-            <span className="text-[10px] text-gray font-sans">OR</span>
-            <div className="flex-1 h-px bg-white/10" />
+              {/* Primary button */}
+              <button
+                type="submit"
+                disabled={submitting}
+                style={{
+                  width: '100%', height: 36, background: submitting ? '#93c5fd' : BLUE,
+                  color: '#fff', border: 'none', borderRadius: 6,
+                  fontSize: 14, fontWeight: 500, cursor: submitting ? 'not-allowed' : 'pointer',
+                  fontFamily: 'Geist, sans-serif', transition: 'background 0.15s',
+                  marginTop: 4,
+                }}
+                onMouseEnter={e => { if (!submitting) e.target.style.background = '#1d4ed8' }}
+                onMouseLeave={e => { if (!submitting) e.target.style.background = BLUE }}
+              >
+                {submitting ? 'Please wait…' : mode === 'login' ? 'Login' : 'Create Account'}
+              </button>
+
+              {/* Separator */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '4px 0' }}>
+                <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+                <span style={{ fontSize: 12, fontWeight: 400, color: C_MID, whiteSpace: 'nowrap' }}>Or continue with</span>
+                <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+              </div>
+
+              {/* Secondary button */}
+              <button
+                type="button"
+                style={{
+                  width: '100%', height: 36, background: '#fff',
+                  color: C_DARK, border: '1px solid #e5e7eb', borderRadius: 6,
+                  fontSize: 14, fontWeight: 500, cursor: 'pointer',
+                  fontFamily: 'Geist, sans-serif', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', gap: 8,
+                  transition: 'border-color 0.15s, background 0.15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#f9fafb'; e.currentTarget.style.borderColor = '#d1d5db' }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#e5e7eb' }}
+              >
+                <Github size={16} />
+                {mode === 'login' ? 'Login with GitHub' : 'Sign up with GitHub'}
+              </button>
+            </form>
+
+            {/* Toggle link */}
+            <p style={{ fontSize: 14, fontWeight: 400, color: C_MID, marginTop: 24, textAlign: 'center' }}>
+              {mode === 'login' ? (
+                <>Don't have an account?{' '}
+                  <button onClick={() => { setMode('signup'); setError(null) }} style={{ color: BLUE, background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0, fontFamily: 'Geist, sans-serif' }}>
+                    Sign up
+                  </button>
+                </>
+              ) : (
+                <>Already have an account?{' '}
+                  <button onClick={() => { setMode('login'); setError(null) }} style={{ color: BLUE, background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0, fontFamily: 'Geist, sans-serif' }}>
+                    Sign in
+                  </button>
+                </>
+              )}
+            </p>
           </div>
+        </div>
 
-          <button className="w-full mt-6 flex items-center justify-center gap-3 border border-white/10 py-4 text-xs tracking-widest text-gray font-sans hover:text-cream hover:border-white/30 transition-all duration-300">
-            CONTINUE WITH GOOGLE
-          </button>
+        {/* Footer */}
+        <p style={{ fontSize: 14, fontWeight: 400, color: C_MID, textAlign: 'center' }}>
+          By continuing, you agree to our{' '}
+          <Link to="/" style={{ color: C_DARK, textDecoration: 'underline' }}>Terms of Service</Link>
+          {' '}and{' '}
+          <Link to="/" style={{ color: C_DARK, textDecoration: 'underline' }}>Privacy Policy</Link>.
+        </p>
+      </div>
 
-          <p className="mt-10 text-[10px] text-gray font-sans text-center">
-            {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-            <button
-              onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-              className="text-gold hover:text-cream transition-colors"
-            >
-              {mode === 'login' ? 'Create one' : 'Sign in'}
-            </button>
+      {/* ── Right: decorative panel ── */}
+      <div
+        className="hidden md:block w-1/2"
+        style={{
+          background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Pattern overlay */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.08) 0%, transparent 50%),
+                            radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 50%)`,
+        }} />
+        {/* Grid decoration */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)`,
+          backgroundSize: '48px 48px',
+        }} />
+        {/* Center content */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 48 }}>
+          <div style={{ width: 56, height: 56, background: 'rgba(255,255,255,0.15)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, backdropFilter: 'blur(8px)' }}>
+            <GalleryVerticalEnd size={28} color="#fff" />
+          </div>
+          <h2 style={{ ...G, fontSize: 28, fontWeight: 700, color: '#fff', textAlign: 'center', margin: '0 0 12px', letterSpacing: '-0.5px' }}>
+            Your style,<br />curated for you.
+          </h2>
+          <p style={{ ...G, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.7)', textAlign: 'center', maxWidth: 280, lineHeight: 1.6, margin: 0 }}>
+            AI-powered outfit recommendations tailored to your personal taste.
           </p>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }
 
-function FormField({ label, type, value, onChange, required }) {
+// ── Reusable field ──────────────────────────────────────────────────
+function Field({ label, type, value, onChange, placeholder, description, required }) {
   return (
-    <div className="group">
-      <label className="block text-[10px] tracking-widest text-gray font-sans mb-2 group-focus-within:text-gold transition-colors">
+    <div>
+      <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: C_DARK, marginBottom: 6 }}>
         {label}
       </label>
       <input
         type={type}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
         required={required}
-        className="w-full bg-transparent border border-white/10 px-4 py-3 text-sm text-cream font-body focus:outline-none focus:border-gold transition-colors placeholder-white/20"
-        placeholder={`Enter your ${label.toLowerCase()}`}
+        style={{
+          width: '100%', height: 36, padding: '0 12px',
+          border: '1px solid #e5e7eb', borderRadius: 6,
+          fontSize: 14, fontWeight: 400, color: C_DARK,
+          background: '#fff', outline: 'none', boxSizing: 'border-box',
+          fontFamily: 'Geist, sans-serif',
+        }}
+        onFocus={e => e.target.style.borderColor = BLUE}
+        onBlur={e => e.target.style.borderColor = '#e5e7eb'}
       />
+      {description && (
+        <p style={{ fontSize: 14, fontWeight: 400, color: C_MID, marginTop: 6, marginBottom: 0 }}>
+          {description}
+        </p>
+      )}
     </div>
   )
 }

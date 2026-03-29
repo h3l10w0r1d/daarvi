@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { motion, useInView } from 'framer-motion'
 import {
   ArrowRight, User, ShoppingBag, Truck, RotateCcw,
-  Shield, X, Search, Menu,
+  Shield, X, Search, Menu, Twitter, Instagram, Youtube,
+  ChevronDown,
 } from 'lucide-react'
 import { brands, products } from '../data/mockData'
 import LoginModal from '../components/LoginModal'
@@ -41,7 +42,7 @@ export default function Landing() {
         defaultMode={modalMode}
       />
       <AnnouncementBanner />
-      <StoreNavbar openModal={openModal} mobileNavOpen={mobileNavOpen} setMobileNavOpen={setMobileNavOpen} />
+      <StoreNavbar mobileNavOpen={mobileNavOpen} setMobileNavOpen={setMobileNavOpen} />
       <HeroSection openModal={openModal} />
       <FeaturedProducts openModal={openModal} />
       <ShopByCategory openModal={openModal} />
@@ -55,96 +56,203 @@ export default function Landing() {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// ① ANNOUNCEMENT BANNER
+// ① ANNOUNCEMENT BANNER  (Figma: blue bar, h=48)
 // ════════════════════════════════════════════════════════════════════
 function AnnouncementBanner() {
-  const [visible, setVisible] = useState(true)
-  if (!visible) return null
   return (
-    <div
-      className="relative flex items-center justify-center gap-2 px-10"
-      style={{ ...G, background: BLUE, height: 40 }}
-    >
-      <Truck size={14} color={C_LIGHT} />
-      <span style={{ fontSize: 14, fontWeight: 500, lineHeight: '20px', color: C_LIGHT }}>
-        Free shipping on orders over $75
-      </span>
-      <button
-        onClick={() => setVisible(false)}
-        className="absolute right-4 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition-opacity"
-      >
-        <X size={14} color={C_LIGHT} />
-      </button>
+    <div style={{ ...G, background: BLUE, height: 48 }} className="flex items-center">
+      <div className="max-w-[1440px] w-full mx-auto px-8 flex items-center justify-between">
+        {/* Social icons */}
+        <div className="flex items-center gap-4">
+          <Twitter size={16} color={C_LIGHT} strokeWidth={1.5} className="opacity-90 hover:opacity-100 cursor-pointer transition-opacity" />
+          <Instagram size={16} color={C_LIGHT} strokeWidth={1.5} className="opacity-90 hover:opacity-100 cursor-pointer transition-opacity" />
+          <Youtube size={16} color={C_LIGHT} strokeWidth={1.5} className="opacity-90 hover:opacity-100 cursor-pointer transition-opacity" />
+        </div>
+        {/* Center text */}
+        <span style={{ fontSize: 14, fontWeight: 500, lineHeight: '20px', color: C_LIGHT }}>
+          Free shipping on orders over $75
+        </span>
+        {/* Currency / Language dropdowns */}
+        <div className="flex items-center gap-4">
+          <button className="flex items-center gap-1" style={{ fontSize: 14, fontWeight: 500, color: C_LIGHT }}>
+            USD <ChevronDown size={14} color={C_LIGHT} />
+          </button>
+          <button className="flex items-center gap-1" style={{ fontSize: 14, fontWeight: 500, color: C_LIGHT }}>
+            English <ChevronDown size={14} color={C_LIGHT} />
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
 
 // ════════════════════════════════════════════════════════════════════
-// ② STORE NAVBAR
+// ② STORE NAVBAR  (Figma: white bar h=64 + megamenu)
 // ════════════════════════════════════════════════════════════════════
-const NAV_LINKS = ['Women', 'Men', 'Kids', 'About Us', 'Store Locator']
+const NAV_LINKS = [
+  { label: 'Women',         mega: true  },
+  { label: 'Men',           mega: false },
+  { label: 'Kids',          mega: false },
+  { label: 'Accessories',   mega: false },
+  { label: 'Store Locator', mega: false },
+]
+
+const MEGA_MENU = {
+  clothing: {
+    title: 'Clothing',
+    items: ['Tops & Blouses','Dresses','Pants & Jeans','Skirts','Sweaters','Jackets & Coats','Activewear','Shop all'],
+  },
+  accessories: {
+    title: 'Accessories',
+    items: ['Handbags','Jewelry','Watches','Sunglasses','Scarves'],
+  },
+  brands: {
+    title: 'Featured Brands',
+    items: ['Elegance Co','Style Maven','Chic Boutique','Modern Lady'],
+  },
+}
 
 function StoreNavbar({ openModal, mobileNavOpen, setMobileNavOpen }) {
   const { cartCount } = useApp()
+  const [megaOpen, setMegaOpen] = useState(false)
+  const closeTimer = useRef(null)
+
+  const openMega  = () => { clearTimeout(closeTimer.current); setMegaOpen(true) }
+  const closeMega = () => { closeTimer.current = setTimeout(() => setMegaOpen(false), 120) }
 
   return (
-    <header style={{ background: '#ffffff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 50 }}>
-      <div className="max-w-[1280px] mx-auto px-6 flex items-center justify-between gap-8" style={{ height: 64 }}>
+    <header
+      style={{ background: '#ffffff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 50 }}
+      onMouseLeave={closeMega}
+    >
+      {/* ── Main nav row ── */}
+      <div className="max-w-[1440px] mx-auto px-8 flex items-center justify-between" style={{ height: 64 }}>
         {/* Logo */}
-        <span style={{ ...G, fontSize: 20, fontWeight: 600, letterSpacing: '0.12em', color: C_DARK, flexShrink: 0 }}>
+        <Link to="/" style={{ ...G, fontSize: 20, fontWeight: 700, letterSpacing: '0.1em', color: C_DARK, textDecoration: 'none', flexShrink: 0 }}>
           DAARVI
-        </span>
+        </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8 flex-1">
-          {NAV_LINKS.map((label) => (
+        {/* Desktop nav links */}
+        <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
+          {NAV_LINKS.map(({ label, mega }) => (
             <button
               key={label}
-              onClick={() => openModal('login')}
-              style={{ ...G, fontSize: 14, fontWeight: 500, lineHeight: '20px', color: C_DARK }}
-              className="hover:opacity-60 transition-opacity"
+              onMouseEnter={mega ? openMega : closeMega}
+              style={{ ...G, fontSize: 14, fontWeight: 500, lineHeight: '20px', color: C_DARK, padding: '8px 16px' }}
+              className="flex items-center gap-1 rounded-md hover:bg-gray-50 transition-colors"
             >
               {label}
+              {mega && <ChevronDown size={14} color={C_DARK} style={{ opacity: 0.5, transition: 'transform 0.2s', transform: megaOpen ? 'rotate(180deg)' : 'rotate(0)' }} />}
             </button>
           ))}
         </nav>
 
-        {/* Actions */}
-        <div className="flex items-center gap-4">
-          <button className="hidden md:block" onClick={() => openModal('login')}>
-            <Search size={20} color={C_DARK} strokeWidth={1.5} className="hover:opacity-60 transition-opacity" />
+        {/* Action icons */}
+        <div className="flex items-center gap-2">
+          <button
+            className="hidden md:flex items-center justify-center w-9 h-9 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            <Search size={18} color={C_DARK} strokeWidth={1.5} />
           </button>
-          <button onClick={() => openModal('login')}>
-            <User size={20} color={C_DARK} strokeWidth={1.5} className="hover:opacity-60 transition-opacity" />
-          </button>
-          <button onClick={() => openModal('login')} className="relative">
-            <ShoppingBag size={20} color={C_DARK} strokeWidth={1.5} className="hover:opacity-60 transition-opacity" />
+          <Link
+            to="/login"
+            className="flex items-center justify-center w-9 h-9 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            <User size={18} color={C_DARK} strokeWidth={1.5} />
+          </Link>
+          <Link
+            to="/login"
+            className="relative flex items-center justify-center w-9 h-9 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            <ShoppingBag size={18} color={C_DARK} strokeWidth={1.5} />
             {cartCount > 0 && (
               <span
-                className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
+                className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
                 style={{ ...G, background: BLUE, color: '#fff', fontSize: 10, fontWeight: 700 }}
               >
                 {cartCount}
               </span>
             )}
-          </button>
-          <button className="md:hidden" onClick={() => setMobileNavOpen(!mobileNavOpen)}>
+          </Link>
+          <button className="md:hidden flex items-center justify-center w-9 h-9" onClick={() => setMobileNavOpen(!mobileNavOpen)}>
             <Menu size={20} color={C_DARK} />
           </button>
         </div>
       </div>
 
+      {/* ── Mobile nav ── */}
       {mobileNavOpen && (
-        <div style={{ background: '#fff', borderTop: '1px solid #f3f4f6' }} className="md:hidden px-6 py-4 flex flex-col gap-4">
-          {NAV_LINKS.map((label) => (
+        <div style={{ background: '#fff', borderTop: '1px solid #f3f4f6' }} className="md:hidden px-6 py-4 flex flex-col gap-1">
+          {NAV_LINKS.map(({ label }) => (
             <button
               key={label}
-              onClick={() => { openModal('login'); setMobileNavOpen(false) }}
-              style={{ ...G, fontSize: 14, fontWeight: 500, color: C_DARK, textAlign: 'left' }}
+              onClick={() => setMobileNavOpen(false)}
+              style={{ ...G, fontSize: 14, fontWeight: 500, color: C_DARK, textAlign: 'left', padding: '10px 0' }}
+              className="border-b border-gray-50 last:border-0"
             >
               {label}
             </button>
           ))}
+          <div className="pt-4 flex gap-3">
+            <Link to="/login" style={{ ...G, fontSize: 14, fontWeight: 500, color: '#fff', background: BLUE, padding: '8px 20px', borderRadius: 6, textDecoration: 'none' }}>
+              Login
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* ── Mega menu ── */}
+      {megaOpen && (
+        <div
+          style={{ background: '#ffffff', borderTop: '1px solid #e5e7eb', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}
+          onMouseEnter={openMega}
+          onMouseLeave={closeMega}
+        >
+          <div className="max-w-[1280px] mx-auto px-8 py-8 grid grid-cols-5 gap-8">
+            {/* Clothing */}
+            <div className="col-span-1">
+              <p style={{ ...G, fontSize: 14, fontWeight: 500, color: C_DARK, marginBottom: 16 }}>{MEGA_MENU.clothing.title}</p>
+              <div className="flex flex-col gap-3">
+                {MEGA_MENU.clothing.items.map(item => (
+                  <span key={item} style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID, cursor: 'pointer' }} className="hover:text-black transition-colors">{item}</span>
+                ))}
+              </div>
+            </div>
+            {/* Accessories */}
+            <div className="col-span-1">
+              <p style={{ ...G, fontSize: 14, fontWeight: 500, color: C_DARK, marginBottom: 16 }}>{MEGA_MENU.accessories.title}</p>
+              <div className="flex flex-col gap-3">
+                {MEGA_MENU.accessories.items.map(item => (
+                  <span key={item} style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID, cursor: 'pointer' }} className="hover:text-black transition-colors">{item}</span>
+                ))}
+              </div>
+            </div>
+            {/* Featured Brands */}
+            <div className="col-span-1">
+              <p style={{ ...G, fontSize: 14, fontWeight: 500, color: C_DARK, marginBottom: 16 }}>{MEGA_MENU.brands.title}</p>
+              <div className="flex flex-col gap-3">
+                {MEGA_MENU.brands.items.map(item => (
+                  <span key={item} style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID, cursor: 'pointer' }} className="hover:text-black transition-colors">{item}</span>
+                ))}
+              </div>
+            </div>
+            {/* Featured image card: New Arrivals */}
+            <div className="col-span-1 flex flex-col gap-2">
+              <div style={{ background: GRAY_BG, borderRadius: 8, aspectRatio: '1/1', overflow: 'hidden' }} className="w-full">
+                <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&q=80" alt="New Arrivals" className="w-full h-full object-cover" />
+              </div>
+              <p style={{ ...G, fontSize: 14, fontWeight: 500, color: C_DARK }}>New Arrivals</p>
+              <span style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID, cursor: 'pointer' }} className="hover:text-black transition-colors">Shop now</span>
+            </div>
+            {/* Featured image card: Summer Collection */}
+            <div className="col-span-1 flex flex-col gap-2">
+              <div style={{ background: GRAY_BG, borderRadius: 8, aspectRatio: '1/1', overflow: 'hidden' }} className="w-full">
+                <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80" alt="Summer Collection" className="w-full h-full object-cover" />
+              </div>
+              <p style={{ ...G, fontSize: 14, fontWeight: 500, color: C_DARK }}>Summer Collection</p>
+              <span style={{ ...G, fontSize: 14, fontWeight: 400, color: C_MID, cursor: 'pointer' }} className="hover:text-black transition-colors">Shop now</span>
+            </div>
+          </div>
         </div>
       )}
     </header>
