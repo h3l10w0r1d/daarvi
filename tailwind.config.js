@@ -14,6 +14,7 @@ export default {
         serif: ['Playfair Display', 'Georgia', 'serif'],
         sans: ['Space Grotesk', 'Inter', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
+        geist: ['Geist', 'sans-serif'],
       },
       letterSpacing: {
         widest: '0.3em',
